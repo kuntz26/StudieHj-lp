@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Register
+{% endblock %}
+
+{% block body %}
+    <h3>Register</h3><br>
+    <form action="/register" method="post">
+        <input autocomplete="off" autofocus id="username" name="username" placeholder="Brugernavn" type="text" required>
+        <input autocomplete="off" id="email" name="email" placeholder="Email" type="text" required>
+        <input id="password" name="password" placeholder="Password" type="password" required>
+        <input id="confirm_password" name="confirm_password" placeholder="Bekræft password" type="password" required>
+        <button type="submit">Register</button>
+        <p id="error-message" style="color: red; display: none;">Passwords matcher ikke!</p>
+    </form>
+
+    <script>
+        document.querySelector("form").addEventListener("submit", function(event) {
+            let password = document.querySelector("#password").value;
+            let confirm_password = document.querySelector("#confirm_password").value;
+            let errorMessage = document.querySelector("#error-message");
+    
+            if (password !== confirm_password) {
+                // Show error message
+                errorMessage.style.display = "block";
+                errorMessage.textContent = "Passwords matcher ikke!";
+                
+                // Prevent form submission
+                event.preventDefault();
+            } else {
+                errorMessage.style.display = "none"; // Hide the error if passwords match
+            }
+        });
+    </script>
+{% endblock %}
