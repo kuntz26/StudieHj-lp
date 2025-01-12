@@ -13,8 +13,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # Configure upload file path flask
-UPLOAD_FOLDER = "./static/uploadfiles"
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['UPLOAD_FOLDER'] = "./static/uploadfiles"
 
 
 @app.route("/")
@@ -60,6 +59,7 @@ def budget():
             writer.writeheader()
             for name in income_expences:
                 writer.writerow({fieldnames[0]: name, fieldnames[1]: income_expences[name]})
+        
         if session.get("user_id"):
             conn = sqlite3.connect("database.db")
             cur = conn.cursor()
@@ -70,6 +70,8 @@ def budget():
             cur.execute("UPDATE people SET filename = ? WHERE id = ?", (filename, session["user_id"]))
             conn.commit()
             conn.close()
+        
+
         filename = filepath
     
     if filename:
@@ -105,18 +107,24 @@ def upload_file():
     filename = uuid.uuid4().hex + "_file_upload" + ".csv"
     file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
     
+    if old_file := session.pop("filename", None):
+        os.remove(os.path.join(app.config["UPLOAD_FOLDER"], old_file))
+    
+    session["filename"] = filename
     if session.get("user_id"):
         # Add to database
         conn = sqlite3.connect("database.db")
         cur = conn.cursor()
         rows = cur.execute("SELECT filename FROM people WHERE id = ?", (session["user_id"],))
         if old_file := rows.fetchone():
-            os.remove(os.path.join(app.config["UPLOAD_FOLDER"], old_file[0]))
+            try:
+                os.remove(os.path.join(app.config["UPLOAD_FOLDER"], old_file[0]))
+            except:
+                pass
         cur.execute("UPDATE people SET filename = ? WHERE id = ?", (filename, session["user_id"]))
         conn.commit()
         conn.close()
-        return redirect("/budget")
-    return redirect("/budget?file=" + filename)
+    return redirect("/budget")
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -133,7 +141,7 @@ def login():
         
         conn = sqlite3.connect("database.db")
         cur = conn.cursor()
-        rows = cur.execute("SELECT id, username, email, password FROM people, login WHERE people.id = login.personid AND email = ?", (email,))
+        rows = cur.execute("SELECT id, username, email, password, filename FROM people, login WHERE people.id = login.personid AND email = ?", (email,))
         output = list(rows)
         if len(output) != 1:
             conn.close()
@@ -144,12 +152,22 @@ def login():
         
         session["user_id"] = output[0][0]
         session["username"] = output[0][1]
+        if logged_file := output[0][4]:
+            if filename := session.get("filename"):
+                os.remove(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+            session["filename"] = logged_file
+        else:
+            if filename := session.get("filename"):
+                cur.execute("UPDATE people SET filename = ? WHERE id = ?", (filename, session["user_id"]))
+                conn.commit()
         conn.close()
         return redirect("/")
 
 
 @app.route("/logout")
 def logout():
+    if picture_path := session.get("picture_path"):
+        os.remove(os.path.join(app.root_path, "static", "pictures", picture_path))
     session.clear()
     return redirect("/")
 
@@ -175,7 +193,12 @@ def register():
         rows = cur.execute("SELECT username FROM people WHERE username = ?", (username,))
         if rows.fetchone():
             return apology("Brugernavn i brug allerede")
-        cur.execute("INSERT INTO people(username) VALUES(?)", (username,))
+        
+        if filename := session.get("filename"):
+            cur.execute("INSERT INTO people(username, filename) VALUES(?, ?)", (username, filename))
+        else:
+            cur.execute("INSERT INTO people(username) VALUES(?)", (username,))
+        
         session["user_id"] = int(cur.lastrowid)
         session["username"] = username
         cur.execute("INSERT INTO login(personid, email, password) VALUES(?, ?, ?)", (session["user_id"], email, generate_password_hash(password)))
@@ -191,4 +214,4 @@ def myaccount():
             return render_template("myaccount.html", username=session["username"], user_id=session["user_id"])
         return apology("Not authorized", code=401)
     else:
-        ...
+        return apology("Not made yet")
