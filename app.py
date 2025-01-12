@@ -1,4 +1,5 @@
-import csv, sqlite3, os, uuid
+import csv, sqlite3, os, secrets, uuid
+from datetime import timedelta
 from flask import Flask, redirect, render_template, request, session, url_for
 from flask_session import Session
 from bank_transactions import Transactions
@@ -10,6 +11,8 @@ app = Flask(__name__)
 
 app.config["SESSION_PERMANENT"] = True
 app.config["SESSION_TYPE"] = "filesystem"
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=7)
+app.secret_key = os.environ.get("SECRET_KEY", secrets.token_hex(32))
 Session(app)
 
 # Configure upload file path flask
@@ -143,6 +146,10 @@ def login():
         
         session["user_id"] = output[0][0]
         session["username"] = output[0][1]
+#        if request.form.get("remember_me") == "on":
+#            session.permanent = True  # Default session behavior
+#        else:
+#            session.permanent = False  # Make the session non-persistent
         if logged_file := output[0][4]:
             if filename := session.get("filename"):
                 os.remove(os.path.join(app.config["UPLOAD_FOLDER"], filename))
