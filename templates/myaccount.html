@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block title %}My account{% endblock %}
+
+{% block body %}
+    <h1>Your account</h1>
+    <form action="/myaccount?change=username" method="post">
+        Your username: {{ username }}
+        <button type="submit">Change your password</button>
+    </form>
+    <form action="/myaccount?change=password" method="post">
+        <button type="submit">Change your password</button>
+    </form>
+{% endblock %}

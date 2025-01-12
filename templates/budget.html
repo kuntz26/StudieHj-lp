@@ -1,0 +1,101 @@
+{% extends "layout.html" %}
+
+{% block title %}Budgetberegner{% endblock %}
+
+{% block body %}
+    {% if error %}
+        <span class="red">{{ error }}</span>
+    {% endif %}
+
+    <h1>Budgetberegneren</h1>
+    <h3>På denne side kan du enten manuelt skrive værdier ind, for at få beregnet dit forbrug, 
+        eller du kan uploade en .csv fil, som er eksporteret fra din bank.</h3>
+    <h5>Upload en fil</h5>
+    <form action="/uploadfile" method="post" id="file" enctype="multipart/form-data">
+        <input type="file" name="file" id="transactions" accept=".csv" required>
+        <input type="submit">
+        <p id="error-message" style="color: red; display: none;">Vælg en .csv fil før du sender.</p>
+    </form>
+
+    <h5>Indtast manuelt. Vælg en periode, og tæl sammen for alle kategorier. Du kan kun indsætte hele tal. Husk at skrive det som negativ værdi, hvis det er en udgift!</h5>
+    <form id="choice">
+        <input type="radio" name="choice" value="simple">Simpelt
+        <input type="radio" name="choice" value="advanced"> Advanceret
+    </form>
+    <form action="/budget" method="post" name="simple" hidden>
+        <input name="indtægter" placeholder="Indtægter" type="number">
+        <input name="udgifter" placeholder="Udgifter" type="number">
+        <button type="submit">Beregn</button>
+    </form>
+    <form action="/budget" method="post" name="advanced" hidden>
+        <input type="number" name="indtægter" placeholder="Indtægter" id="indtægter">
+        <input type="number" name="bolig" placeholder="Bolig udgifter" id="bolig">
+        <input type="number" name="øvrige_faste" placeholder="Øvrige faste udgifter" id="øvrige_faste">
+        <input type="number" name="transport" placeholder="Transport udgifter" id="transport">
+        <input type="number" name="mad" placeholder="Mad udgifter" id="mad">
+        <input type="number" name="diverse" placeholder="Diverse" id="diverse">
+        <input type="number" name="gældsafvikling" placeholder="Gældsafvikling" id="gældsafvikling">
+        <button type="submit">Beregn</button>
+    </form>
+    
+    {% for group in transactions %}
+        {% for category_name, category_data in group.items() %}
+            <h2>{{ category_name }}</h2> <!-- Display the table name -->
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>Key</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for key, value in category_data.items() %}
+                    <tr>
+                        <td>{{ key }}</td>
+                        <td>{{ value | replace(".", ",") }} kr</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endfor %}
+    {% endfor %}
+
+    {% if pictures %}
+        <iframe src="{{ pictures }}" width="50%" height="500px" title="Graf over forbrug"></iframe>
+    {% endif %}
+
+    <script>
+        document.querySelector("#choice").addEventListener("click", function(event) {
+            const simpleForm = document.querySelector("form[name='simple']");
+            const advancedForm = document.querySelector("form[name='advanced']");
+
+            // Check if the clicked element is one of the radio buttons
+            if (event.target.name === "choice") {
+                if (event.target.value === "simple") {
+                    simpleForm.hidden = false; // Show the simple form
+                    advancedForm.hidden = true; // Hide the advanced form
+                } else if (event.target.value === "advanced") {
+                    simpleForm.hidden = true; // Hide the simple form
+                    advancedForm.hidden = false; // Show the advanced form
+                }
+            }
+        });
+
+        document.querySelector("#file").addEventListener("submit", function(event) {
+            let fileInput = document.querySelector("#transactions");
+            let errorMessage = document.querySelector("#error-message");
+
+            if (!fileInput.files || fileInput.files.length === 0) {
+                // Show an error message if no file is selected
+                errorMessage.style.display = "block";
+                errorMessage.textContent = "Vælg en .csv fil før du sender.";
+                
+                // Prevent form submission
+                event.preventDefault();
+            } else {
+                // Hide the error message if a file is selected
+                errorMessage.style.display = "none";
+            }
+        });
+    </script>
+{% endblock %}
