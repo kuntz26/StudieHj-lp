@@ -2,4 +2,6 @@
 /static/pictures/
 /static/uploadfiles/
 /flask_session/
-Account.csv
+/Account.csv
+/Test.csv
+/test.py
