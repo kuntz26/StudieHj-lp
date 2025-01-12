@@ -8,7 +8,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
 
-app.config["SESSEION_PERMANENT"] = False
+app.config["SESSION_PERMANENT"] = True
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
@@ -25,20 +25,9 @@ def index():
 def budget():
     filename = ""
     if request.method == "GET":
-        if not session.get("user_id"):
-            if not request.args.get("file"):
-                return render_template("budget.html", error=request.args.get("error"))
-            filename = os.path.join(app.config["UPLOAD_FOLDER"], request.args.get("file"))
-        else:
-            conn = sqlite3.connect("database.db")
-            cur = conn.cursor()
-            rows = cur.execute("SELECT filename FROM people WHERE id = ?", (session["user_id"],))
-            if file := rows.fetchone():
-                filename = os.path.join(app.config["UPLOAD_FOLDER"], file[0])
-                conn.close()
-            else:
-                conn.close()
-                return render_template("budget.html", error=request.args.get("error"))
+        if not (filename := session.get("filename")):
+            return render_template("budget.html", error=request.args.get("error"))
+        filename = os.path.join(app.config["UPLOAD_FOLDER"], filename)
 
     else:
         if request.form.get('udgifter'):
@@ -60,18 +49,17 @@ def budget():
             for name in income_expences:
                 writer.writerow({fieldnames[0]: name, fieldnames[1]: income_expences[name]})
         
+        if old_file := session.get("filename"):
+            os.remove(os.path.join(app.config["UPLOAD_FOLDER"], old_file))
+        session["filename"] = filename
+        
         if session.get("user_id"):
             conn = sqlite3.connect("database.db")
             cur = conn.cursor()
-            rows = cur.execute("SELECT filename FROM people WHERE id = ?", (session["user_id"],))
-            old_file = rows.fetchone()
-            if old_file and old_file[0] is not None:
-                os.remove(os.path.join(app.config["UPLOAD_FOLDER"], old_file[0]))
             cur.execute("UPDATE people SET filename = ? WHERE id = ?", (filename, session["user_id"]))
             conn.commit()
             conn.close()
         
-
         filename = filepath
     
     if filename:
@@ -80,13 +68,16 @@ def budget():
         transaction_dict_list = list()
         transaction_dict_list.append(transactions.transactions(group))
         picture_path = os.path.join(app.root_path, "static", "pictures", f"{uuid.uuid4().hex}_picture.html")
-        transaction_pic_name = transactions.makePlot(transaction_dict_list[0]["Hovedkategori"], picture_path)
+        transaction_pic_name = transactions.makePlot(transaction_dict_list[0][group], picture_path)
+        if old_picture := session.get("picture_path"):
+            os.remove(old_picture)
+        session["picture_path"] = picture_path
         picture_url = url_for('static', filename=f'pictures/{os.path.basename(picture_path)}')
         total = 0
-        for key in transaction_dict_list[0]["Hovedkategori"]:
-            total += transaction_dict_list[0]["Hovedkategori"][key]
+        for key in transaction_dict_list[0][group]:
+            total += transaction_dict_list[0][group][key]
             total = round(total)
-        transaction_dict_list[0]["Hovedkategori"]["I alt"] = total
+        transaction_dict_list[0][group]["Rest beløb"] = total
         return render_template("budget.html", error=request.args.get("error"), transactions=transaction_dict_list, pictures=picture_url)
     return render_template("budget.html", error=request.args.get("error"))
 
@@ -167,7 +158,7 @@ def login():
 @app.route("/logout")
 def logout():
     if picture_path := session.get("picture_path"):
-        os.remove(os.path.join(app.root_path, "static", "pictures", picture_path))
+        os.remove(picture_path)
     session.clear()
     return redirect("/")
 
