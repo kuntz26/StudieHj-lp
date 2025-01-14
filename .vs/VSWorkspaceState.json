@@ -1,8 +1,9 @@
 {
   "ExpandedNodes": [
     "",
+    "\\static",
     "\\templates"
   ],
-  "SelectedNode": "\\templates\\login.html",
+  "SelectedNode": "\\templates\\layout.html",
   "PreviewInSolutionExplorer": false
 }
