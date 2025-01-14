@@ -5,15 +5,98 @@
 {% endblock %}
 
 {% block body %}
-    <h3>Log In</h3><br>
-    <form action="/login" method="post">
-        <input autocomplete="off" autofocus id="email" name="email" placeholder="Email" type="text" required>
-        <input id="password" name="password" placeholder="Password" type="password" required>
-<!--
-        <label>
-            Remember me: <input type="checkbox" name="remember_me">
-        </label>
--->
-        <button type="submit">Log In</button>
-    </form>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .login-container {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 300px;
+        }
+
+        .login-container h3 {
+            margin: 0 0 20px;
+            text-align: center;
+            color: #333;
+        }
+
+        .login-container label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .login-container input[type="text"],
+        .login-container input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .login-container input[type="text"]:focus,
+        .login-container input[type="password"]:focus {
+            border-color: #007BFF;
+            outline: none;
+        }
+
+        .login-container button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007BFF;
+            border: none;
+            color: white;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .login-container button:hover {
+            background-color: #0056b3;
+        }
+
+        .login-container .signup-link {
+            display: block;
+            margin-top: 15px;
+            text-align: center;
+            font-size: 14px;
+            color: #007BFF;
+            text-decoration: none;
+        }
+
+        .login-container .signup-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+
+    <div class="login-container">
+        <h3>Log In</h3>
+        <form action="/login" method="post">
+            <label for="email">Email</label>
+            <input autocomplete="off" autofocus id="email" name="email" placeholder="Enter your email" type="text" required>
+            
+            <label for="password">Password</label>
+            <input id="password" name="password" placeholder="Enter your password" type="password" required>
+            
+            <!-- Uncomment this if needed -->
+            <!-- <label>
+                Remember me: <input type="checkbox" name="remember_me">
+            </label> -->
+            
+            <button type="submit">Log In</button>
+        </form>
+        <a href="/signup" class="signup-link">Don't have an account? Sign up</a>
+    </div>
 {% endblock %}
