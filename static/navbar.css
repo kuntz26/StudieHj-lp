@@ -15,38 +15,36 @@ body {
     border-radius: 0;
 }
 
-.nav-link img {
-    border-radius: 50%;
-    width: 36px;
-    height: 36px;
-    margin: -8px 0;
-    float: left;
-    margin-right: 10px;
-}
-
-.navbar .navbar-brand {
-    padding-left: 0;
-    font-size: 20px;
-    padding-right: 50px;
-}
-
-    .navbar .navbar-brand b {
-        color: #5c6ac4;
+    .navbar .navbar-brand {
+        display: flex;
+        align-items: center; /* Justerer logo og tekst vertikalt */
+        padding-left: 0;
+        font-size: 20px;
+        padding-right: 50px;
     }
 
-.navbar .form-inline {
-    display: inline-block;
-}
+        .navbar .navbar-brand img.logo {
+            height: 40px; /* Størrelse på logo */
+            margin-right: 10px; /* Afstand mellem logo og tekst */
+        }
 
-.navbar .navbar-nav {
-    position: relative;
-}
+        .navbar .navbar-brand b {
+            color: #5c6ac4;
+        }
 
-.navbar a, .navbar a:active {
-    color: #888;
-    font-size: 15px;
-    background: transparent;
-}
+    .navbar .form-inline {
+        display: inline-block;
+    }
+
+    .navbar .navbar-nav {
+        position: relative;
+    }
+
+    .navbar a, .navbar a:active {
+        color: #888;
+        font-size: 15px;
+        background: transparent;
+    }
 
 .search-box {
     position: relative;
@@ -56,7 +54,7 @@ body {
         padding-right: 35px;
         border-color: #dfe3e8;
         border-radius: 4px !important;
-        box-shadow: none
+        box-shadow: none;
     }
 
     .search-box .input-group-text {
