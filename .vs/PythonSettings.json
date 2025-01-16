@@ -1,3 +1,5 @@
 {
-  "Interpreter": "env1\\Scripts\\python.exe"
+  "Interpreter": "env1\\Scripts\\python.exe",
+  "SuppressEnvironmentCreationPrompt": true,
+  "SuppressConfigureTestFrameworkPrompt": "true"
 }

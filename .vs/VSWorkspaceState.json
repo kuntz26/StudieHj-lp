@@ -1,9 +1,10 @@
 {
   "ExpandedNodes": [
     "",
+    "\\javascript",
     "\\static",
     "\\templates"
   ],
-  "SelectedNode": "\\helpers.py",
+  "SelectedNode": "\\templates\\layout.html",
   "PreviewInSolutionExplorer": false
 }
