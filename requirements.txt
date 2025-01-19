@@ -1,5 +1,3 @@
 Flask
 Flask-Session
-//Flask-Login
-matplotlib
 Plotly

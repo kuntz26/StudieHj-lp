@@ -10,6 +10,7 @@
     <h1>Budgetberegneren</h1>
     <h3>På denne side kan du enten manuelt skrive værdier ind, for at få beregnet dit forbrug, 
         eller du kan uploade en .csv fil, som er eksporteret fra din bank.</h3>
+        <div><a href="/budgetinfo">Hvordan får man et sundt budget?</a><a href="/suinfo">Hvordan fungerer SU og hvordan er satserne?</a></div>
     <h5>Upload en fil</h5>
     <form action="/uploadfile" method="post" id="file" enctype="multipart/form-data">
         <input type="file" name="file" id="transactions" accept=".csv" required>
@@ -20,14 +21,16 @@
     <h5>Indtast manuelt. Vælg en periode, og tæl sammen for alle kategorier. Du kan kun indsætte hele tal. Husk at skrive det som negativ værdi, hvis det er en udgift!</h5>
     <form id="choice">
         <input type="radio" name="choice" value="simple">Simpelt
-        <input type="radio" name="choice" value="advanced"> Advanceret
+        <input type="radio" name="choice" value="advanced">Advanceret
     </form>
     <form action="/budget" method="post" name="simple" hidden>
+        <input type="hidden" name="form_type" value="simple">
         <input autocomplete="off" name="indtægter" placeholder="Indtægter" type="number">
         <input autocomplete="off" name="udgifter" placeholder="Udgifter" type="number">
         <button type="submit">Beregn</button>
     </form>
     <form action="/budget" method="post" name="advanced" hidden>
+        <input type="hidden" name="form_type" value="advanced">
         <input autocomplete="off" type="number" name="indtægter" placeholder="Indtægter" id="indtægter">
         <input autocomplete="off" type="number" name="bolig" placeholder="Bolig udgifter" id="bolig">
         <input autocomplete="off" type="number" name="øvrige_faste" placeholder="Øvrige faste udgifter" id="øvrige_faste">

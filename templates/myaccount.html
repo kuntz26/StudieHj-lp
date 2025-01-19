@@ -1,14 +1,95 @@
 {% extends "layout.html" %}
 
-{% block title %}My account{% endblock %}
+{% block title %}Min konto{% endblock %}
 
 {% block body %}
-    <h1>Your account</h1>
-    <form action="/myaccount?change=username" method="post">
-        Your username: {{ username }}
-        <button type="submit">Change your password</button>
+    <h1>Min konto</h1>
+    {% if message %}
+        <p style="color: rgb(15, 163, 15);">{{ message }}</p>
+    {% endif %}
+    <p>Hello, {{ username }}</p>
+    <form action="/myaccount" method="post">
+        <input type="hidden" name="form_type" value="username_change">
+        <p>Skift brugernavn:</p>
+        <input type="text" name="newusername" id="newusername" placeholder="Ny brugernavn" required>
+        <input type="text" name="password" id="password" placeholder="Password" required>
+        <button type="submit">Skift brugernavn</button>
     </form>
-    <form action="/myaccount?change=password" method="post">
-        <button type="submit">Change your password</button>
+    <form action="/myaccount" method="post">
+        <input type="hidden" name="form_type" value="password_change">
+        <p>Skift password:</p>
+        <input type="text" name="oldpassword" id="oldpassword" placeholder="Gammel password" required>
+        <input type="text" name="newpassword" id="newpassword" placeholder="Ny password" required>
+        <input type="text" name="confirmpassword" id="confirmpassword" placeholder="Bekræft password" required>
+        <button type="submit">Skift password</button>
     </form>
+    <form action="/myaccount" method="post">
+        <input type="hidden" name="form_type" value="account_delete">
+        <p>Slet konto</p>
+        <input type="text" name="password" id="password" placeholder="Password" required>
+        <button type="submit">Slet konto</button>
+    </form>
+
+    {% if posts %}
+        <div class="posts-container">
+            <p>Your posts</p>
+            {% for post in posts %}
+                <div class="post">
+                    <div class="post-header">
+                        <h2>{{ post.header }}</h2>
+                        <p class="category">Category: {{ post.category_name }}</p>
+                    </div>
+                    <div class="post-meta">
+                        <span class="username">Posted by: {{ post.username }}</span>
+                        <span class="date">on {{ post.date }}</span>
+                    </div>
+                    <div class="post-content">
+                        <p>{{ post.message }}</p>
+                        {% if post.picturename %}
+                            <img src="/media/{{ post.picturename }}" alt="Post image">
+                        {% endif %}
+                    </div>
+                    <div class="post-footer">
+                        <span class="comments">{{ post.comment_count }} comments</span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <style>
+            .posts-container {
+                width: 60%;
+                margin: auto;
+                font-family: Arial, sans-serif;
+            }
+            .post {
+                border: 1px solid #ccc;
+                padding: 15px;
+                margin-bottom: 20px;
+                border-radius: 8px;
+                background-color: #f9f9f9;
+            }
+            .post-header h2 {
+                margin: 0;
+            }
+            .category {
+                font-size: 0.9em;
+                color: #666;
+            }
+            .post-meta {
+                font-size: 0.8em;
+                color: #999;
+            }
+            .post-content img {
+                max-width: 100%;
+                margin-top: 10px;
+            }
+            .post-footer {
+                margin-top: 10px;
+                font-weight: bold;
+            }
+        </style>
+    {% else %}
+        <p>Du har ikke skrevet nogle offentlige beskeder.</p>
+    {% endif %}
 {% endblock %}

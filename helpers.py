@@ -1,5 +1,7 @@
 from functools import wraps
 from flask import redirect, session, render_template
+from werkzeug.security import check_password_hash
+import sqlite3
 
 def login_required(f):
     """
@@ -21,6 +23,7 @@ def parse_number(value):
     except ValueError:
         return 0
 
+
 def apology(message, code=400):
     """Render message as an apology to user."""
     def escape(s):
@@ -34,3 +37,28 @@ def apology(message, code=400):
             s = s.replace(old, new)
         return s
     return render_template("apology.html", top=code, bottom=escape(message)), code
+
+
+def check_password(personid: int, password: str):
+    conn = sqlite3.connect("database.db")
+    cur = conn.cursor()
+    rows = cur.execute("SELECT password FROM login WHERE personid = ?", (personid,))
+    if check_password_hash(rows[0][0], password):
+        return True
+    return False
+
+
+def get_posts(username: str):
+    if session.get("user_id"):
+        posts = list()
+        conn = sqlite3.connect("database.db")
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        rows = cur.execute("""SELECT publicMessages.id AS id, username, header, message, category.name AS category_name, picturename, date, (SELECT COUNT(*) FROM comments WHERE messageid = publicMessages.id) AS comment_count 
+                                FROM publicMessages JOIN people ON publicMessages.senderid = people.id JOIN category ON publicMessages.categoryid = category.id 
+                                WHERE people.username = ?""", (username,))
+        for row in rows:
+            posts.append(dict(row))
+        conn.close()
+        return posts
+    return False

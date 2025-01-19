@@ -3,7 +3,7 @@ from datetime import timedelta
 from flask import Flask, redirect, render_template, request, session, url_for
 from flask_session import Session
 from bank_transactions import Transactions
-from helpers import apology, parse_number, login_required
+from helpers import apology, parse_number, login_required, check_password, get_posts
 from werkzeug.utils import secure_filename
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -33,15 +33,17 @@ def budget():
         filename = os.path.join(app.config["UPLOAD_FOLDER"], filename)
 
     else:
-        if request.form.get('udgifter'):
+        form_type = request.form.get("form_type")
+        if form_type == "simple":
             categories = ["Indtægter", "Udgifter"]
-        else:
+        elif form_type == "advanced":
             categories = ["Indtægter", "Bolig", "Øvrige_faste", "Transport", "Mad", "Diverse", "Gældsafvikling"]
+        else:
+            return apology("Internal server error", 500)
         
         income_expences = dict()
         for category in categories:
             income_expences[category] = parse_number(request.form.get(category.lower()))
-            print(income_expences[category])
         
         filename = f"{uuid.uuid4().hex}_self_input" + ".csv"
         filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
@@ -121,6 +123,16 @@ def upload_file():
     return redirect("/budget")
 
 
+@app.route("/budgethjælp")
+def budget_hjælp():
+    return render_template("budgethjælp.html")
+
+
+@app.route("/suhjælp")
+def su_hjælp():
+    return render_template("suhjælp.html")
+
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if session.get("user_id"):
@@ -135,14 +147,14 @@ def login():
         
         conn = sqlite3.connect("database.db")
         cur = conn.cursor()
-        rows = cur.execute("SELECT id, username, email, password, filename FROM people, login WHERE people.id = login.personid AND email = ?", (email,))
+        rows = cur.execute("SELECT id, username, email, filename FROM people, login WHERE people.id = login.personid AND email = ?", (email,))
         output = list(rows)
         if len(output) != 1:
             conn.close()
             return apology("Konto med denne email eksisterer ikke", code=403)
-        if not check_password_hash(output[0][3], password):
+        if not check_password(output[0][0], password):
             conn.close()
-            return apology("Email og password matcher ikke", code=403)
+            return apology("Forkert password")
         
         session["user_id"] = output[0][0]
         session["username"] = output[0][1]
@@ -150,7 +162,7 @@ def login():
 #            session.permanent = True  # Default session behavior
 #        else:
 #            session.permanent = False  # Make the session non-persistent
-        if logged_file := output[0][4]:
+        if logged_file := output[0][3]:
             if filename := session.get("filename"):
                 os.remove(os.path.join(app.config["UPLOAD_FOLDER"], filename))
             session["filename"] = logged_file
@@ -204,12 +216,72 @@ def register():
         conn.close()
         return redirect("/")
 
-# TODO: Add public messages
+# TODO: Add public messages in html
 @app.route("/myaccount", methods=["GET", "POST"])
 def myaccount():
     if request.method == "GET":
         if session.get("user_id"):
-            return render_template("myaccount.html", username=session["username"], user_id=session["user_id"])
+            posts = get_posts(session["username"])
+            return render_template("myaccount.html", username=session["username"], user_id=session["user_id"], posts=posts)
         return apology("Not authorized", code=401)
     else:
-        return apology("Not made yet")
+        if session.get("user_id"):
+            conn = sqlite3.connect("database.db")
+            cur = conn.cursor()
+            match request.form.get("form_type"):
+                case "username_change":
+                    if not check_password(session["user_id"], request.form.get("password")):
+                        conn.close()
+                        return apology("Wrong password")
+                    if new_username := request.form.get("newusername"):
+                        cur.execute("UPDATE people SET username = ? WHERE id = ?", (new_username, session["user_id"]))
+                        conn.commit()
+                        conn.close()
+                        return render_template("/myaccount", message="Success")
+                                    
+                case "password_change":
+                    if new_password := request.form.get("newpassword") == request.form.get("confirmpassword"):
+                        if check_password(session["user_id"], request.form.get("oldpassword")):
+                            cur.execute("UPDATE login SET password = ? WHERE personid = ?", (new_password, session["user_id"]))
+                            conn.commit()
+                            conn.close()
+                            return render_template("/myaccount", message="Success")
+                        conn.close()
+                        return apology("Wrong password")
+                    conn.close()
+                    return apology("Passwords not matching")
+
+                case "account_delete":
+                    if not check_password(session["user_id"], request.form.get("password")):
+                        conn.close()
+                        return apology("Wrong password")
+                    cur.execute("DELETE FROM login, people WHERE login.personid = people.id AND people.id = ?", (session["user_id"],))
+                    conn.close()
+                    return render_template("/myaccount", message="Success")
+                
+                case _:
+                    conn.close()
+                    return apology("Internal server error", 500)
+            conn.close()
+        return redirect("/myaccount")
+
+
+@app.route("/accounts/<username>")
+def account(username):
+    posts = get_posts(username)
+    return render_template("account.html", posts=posts, username=username)
+
+
+@app.route("/messages/<messageid>")
+def messages(messageid):
+    return apology("Not made yet :(")
+
+
+@app.route("/lektiehjælp")
+def lektiehjælp():
+    return apology("Not made yet :(")
+
+
+@app.route("/privatebeskeder")
+def privatebeskeder():
+    return apology("Not made yet :(")

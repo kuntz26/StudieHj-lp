@@ -1,6 +1,5 @@
 CREATE TABLE IF NOT EXISTS people (
     id              INTEGER NOT NULL,
-    --name            TEXT,
     username        TEXT NOT NULL UNIQUE,
     filename        TEXT,
     PRIMARY KEY(id AUTOINCREMENT)
@@ -31,7 +30,7 @@ CREATE TABLE IF NOT EXISTS publicMessages (
     message     TEXT NOT NULL,
     categoryid  INTEGER NOT NULL,
     date        DATE NOT NULL,
-    -- Add pictures or files
+    picturename TEXT,
     PRIMARY KEY(id AUTOINCREMENT),
     FOREIGN KEY(senderid) REFERENCES people(id),
     FOREIGN KEY(categoryid) REFERENCES category(id)
