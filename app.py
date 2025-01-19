@@ -272,9 +272,20 @@ def account(username):
     return render_template("account.html", posts=posts, username=username)
 
 
-@app.route("/post/<postid>")
-def messages(postid):
-    return apology("Not made yet :(")
+@app.route("/post/<post_id>")
+def messages(post_id):
+    comments = list()
+    conn = sqlite3.connect("database.db")
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    rows = cur.execute("""SELECT username, header, message, category.name AS category_name, picturename, date, (SELECT COUNT(*) FROM comments WHERE messageid = publicMessages.id) AS comment_count 
+                                FROM publicMessages JOIN people ON publicMessages.senderid = people.id JOIN category ON publicMessages.categoryid = category.id 
+                                WHERE publicMessages.id = ?""", (post_id,))
+    post = dict(rows.fetchone())
+    rows = cur.execute("SELECT date, comment, people.username AS username FROM comments, people WHERE people.id = comments.senderid AND comments.messageid = ?", (post_id,))
+    for row in rows:
+        comments.append(dict(row))
+    return render_template("post.html", post=post, comments=comments)
 
 
 @app.route("/lektiehjælp")

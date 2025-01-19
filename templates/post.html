@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ post.header }}{% endblock %}
+
+{% block body %}
+    <div class="post">
+        <div class="post-header">
+            <h2><a href="/post/{{ post.id }}">{{ post.header }}</a></h2>
+            <p class="category">Kategori: {{ post.category_name }}</p>
+        </div>
+        <div class="post-meta">
+            <span class="username">Af: {{ post.username }}</span>
+            <span class="date">Skrevet d. {{ post.date }}</span>
+        </div>
+        <div class="post-content">
+            <p>{{ post.message }}</p>
+            {% if post.picturename %}
+                <img src="/postuploads/{{ post.picturename }}" alt="Posted image">
+            {% endif %}
+        </div>
+        <div class="post-footer">
+            <span class="comments">{{ post.comment_count }} kommentarer</span>
+        </div>
+    </div>
+
+    {% if comments %}
+        {% for comment in comments %}
+            <div class="comment">
+                <p><strong>{{ comment.username }}</strong> ({{ comment.date }}):</p>
+                <p>{{ comment.comment }}</p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Ingen kommentarer</p>
+    {% endif %}
+{% endblock %}
