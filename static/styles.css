@@ -151,3 +151,38 @@ body {
 		display: block;
 	}
 }
+
+
+
+
+.posts-container {
+    width: 60%;
+    margin: auto;
+    font-family: Arial, sans-serif;
+}
+.post {
+    border: 1px solid #ccc;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+.post-header h2 {
+    margin: 0;
+}
+.category {
+    font-size: 0.9em;
+    color: #666;
+}
+.post-meta {
+    font-size: 0.8em;
+    color: #999;
+}
+.post-content img {
+    max-width: 100%;
+    margin-top: 10px;
+}
+.post-footer {
+    margin-top: 10px;
+    font-weight: bold;
+}

@@ -1,0 +1,58 @@
+<div class="posts-container">
+    <p>Your posts</p>
+    {% for post in posts %}
+        <div class="post">
+            <div class="post-header">
+                <h2><a href="/post/{{ post.id }}">{{ post.header }}</a></h2>
+                <p class="category">Category: {{ post.category_name }}</p>
+            </div>
+            <div class="post-meta">
+                <span class="username">Posted by: {{ post.username }}</span>
+                <span class="date">on {{ post.date }}</span>
+            </div>
+            <div class="post-content">
+                <p>{{ post.message }}</p>
+                {% if post.picturename %}
+                    <img src="/postuploads/{{ post.picturename }}" alt="Posted image">
+                {% endif %}
+            </div>
+            <div class="post-footer">
+                <span class="comments">{{ post.comment_count }} comments</span>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<style>
+    .posts-container {
+        width: 60%;
+        margin: auto;
+        font-family: Arial, sans-serif;
+    }
+    .post {
+        border: 1px solid #ccc;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+    }
+    .post-header h2 {
+        margin: 0;
+    }
+    .category {
+        font-size: 0.9em;
+        color: #666;
+    }
+    .post-meta {
+        font-size: 0.8em;
+        color: #999;
+    }
+    .post-content img {
+        max-width: 100%;
+        margin-top: 10px;
+    }
+    .post-footer {
+        margin-top: 10px;
+        font-weight: bold;
+    }
+</style>

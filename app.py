@@ -272,8 +272,8 @@ def account(username):
     return render_template("account.html", posts=posts, username=username)
 
 
-@app.route("/messages/<messageid>")
-def messages(messageid):
+@app.route("/post/<postid>")
+def messages(postid):
     return apology("Not made yet :(")
 
 
@@ -282,6 +282,8 @@ def lektiehjælp():
     return apology("Not made yet :(")
 
 
-@app.route("/privatebeskeder")
-def privatebeskeder():
+@app.route("/privatemessages/<username>")
+def privatebeskeder(username):
+    if username:
+        ...
     return apology("Not made yet :(")
