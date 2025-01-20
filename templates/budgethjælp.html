@@ -2,6 +2,177 @@
 
 {% block title %}Hjælp til budgettet{% endblock %}
 
-{% block body %}
-    Tekst m. eksempler for en- eller to personer.
-{% endblock %}
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budgetberegner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        h1, h2 {
+            color: #0056b3;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #0056b3;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Hvordan virker vores budgetberegner?</h1>
+    <p>Vores budgetberegner er designet til studerende, der er hjemmeboende eller flyttet hjemmefra og har brug for hjælp til at holde styr på deres økonomi. 
+        Den hjælper med at få et overblik over din månedlige indkomst og udgifter, så du kan planlægge dine penge og sikre, at der er nok til både nødvendige udgifter og personlige fornøjelser.
+        </p>
+
+    <h2>Eksempel på budgetberegning for en person</h2>
+    <table>
+        <tr>
+            <th>Post</th>
+            <th>Beløb (DKK)</th>
+        </tr>
+        <tr>
+            <td><strong>Indkomst</strong></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Indkomst fra job</td>
+            <td>4.000</td>
+        </tr>
+        <tr>
+            <td>SU-indkomst</td>
+            <td>5.800</td>
+        </tr>
+        <tr>
+            <td><strong>Udgifter</strong></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Husleje</td>
+            <td>4.500</td>
+        </tr>
+        <tr>
+            <td>Strømforbrug</td>
+            <td>500</td>
+        </tr>
+        <tr>
+            <td>Vandforbrug</td>
+            <td>200</td>
+        </tr>
+        <tr>
+            <td>Transport</td>
+            <td>400</td>
+        </tr>
+        <tr>
+            <td><strong>Resterende</strong></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Mad og husholdning</td>
+            <td>2.000</td>
+        </tr>
+        <tr>
+            <td>Personligt forbrug</td>
+            <td>200</td>
+        </tr>
+    </table>
+
+    <h2>Eksempel på budgetberegning for to personer</h2>
+    <table>
+        <tr>
+            <th>Post</th>
+            <th>Beløb pr. person (DKK)</th>
+            <th>Beløb samlet (DKK)</th>
+        </tr>
+        <tr>
+            <td><strong>Indkomst</strong></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Indkomst fra job</td>
+            <td>4.000</td>
+            <td>8.000</td>
+        </tr>
+        <tr>
+            <td>SU-indkomst</td>
+            <td>5.800</td>
+            <td>11.600</td>
+        </tr>
+        <tr>
+            <td><strong>Udgifter</strong></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Husleje</td>
+            <td>2.250</td>
+            <td>4.500</td>
+        </tr>
+        <tr>
+            <td>Strømforbrug</td>
+            <td>250</td>
+            <td>500</td>
+        </tr>
+        <tr>
+            <td>Vandforbrug</td>
+            <td>100</td>
+            <td>200</td>
+        </tr>
+        <tr>
+            <td>Transport</td>
+            <td>400</td>
+            <td>800</td>
+        </tr>
+        <tr>
+            <td><strong>Resterende</strong></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Mad og husholdning</td>
+            <td>2.000</td>
+            <td>4.000</td>
+        </tr>
+        <tr>
+            <td>Personligt forbrug</td>
+            <td>1.800</td>
+            <td>3.600</td>
+        </tr>
+    </table>
+
+    <script>
+        // JavaScript kan bruges her til at hente data og udføre dynamiske beregninger
+        console.log("Budgetberegner script loaded.");
+    </script>
+
+    <script type="text/python">
+# Python-kode kan integreres via backend for at lave avancerede beregninger
+# For eksempel, her er en funktion til beregning:
+def beregn_budget(indkomst_job, indkomst_su, husleje, strom, vand, transport):
+    udgifter = husleje + strom + vand + transport
+    resterende = indkomst_job + indkomst_su - udgifter
+    mad_og_husholdning = resterende * 0.7
+    personligt_forbrug = resterende * 0.3
+    return mad_og_husholdning, personligt_forbrug
+    </script>
+</body>
+</html>
