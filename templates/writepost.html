@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+
+{% block title %}Stil et spørgsmål{% endblock %}
+
+{% block body %}
+    <form action="/writepost" method="post" enctype="multipart/form-data">
+        <input type="text" name="header" id="header" placeholder="Enter header">
+        <input type="text" name="message" id="message" placeholder="Enter message">
+        <input type="text" name="category" id="category" placeholder="Enter category">
+        <input accept=".png, .jpg, .jpeg, .svg" type="file" name="picture" id="picture" onchange="previewImage()">
+    </form>
+
+    <!-- This div will hold the image preview -->
+    <div id="imagePreviewContainer"></div>
+
+    <script>
+        function previewImage() {
+            const fileInput = document.getElementById("picture");
+            const imagePreviewContainer = document.getElementById("imagePreviewContainer");
+
+            // Clear previous preview
+            imagePreviewContainer.innerHTML = "";
+
+            const file = fileInput.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    const img = document.createElement("img");
+                    img.src = e.target.result;
+                    img.style.maxWidth = "300px";  // Adjust the preview size as needed
+                    img.style.maxHeight = "300px"; // Adjust the preview size as needed
+                    imagePreviewContainer.appendChild(img);
+                }
+
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
+{% endblock %}

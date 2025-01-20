@@ -2,12 +2,7 @@
 
 {% block title %}Hjælp til budgettet{% endblock %}
 
-<!DOCTYPE html>
-<html lang="da">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Budgetberegner</title>
+{% block body %}
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -36,8 +31,7 @@
             color: white;
         }
     </style>
-</head>
-<body>
+
     <h1>Hvordan virker vores budgetberegner?</h1>
     <p>Vores budgetberegner er designet til studerende, der er hjemmeboende eller flyttet hjemmefra og har brug for hjælp til at holde styr på deres økonomi. 
         Den hjælper med at få et overblik over din månedlige indkomst og udgifter, så du kan planlægge dine penge og sikre, at der er nok til både nødvendige udgifter og personlige fornøjelser.
@@ -174,5 +168,4 @@ def beregn_budget(indkomst_job, indkomst_su, husleje, strom, vand, transport):
     personligt_forbrug = resterende * 0.3
     return mad_og_husholdning, personligt_forbrug
     </script>
-</body>
-</html>
+{% endblock %}

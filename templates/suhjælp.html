@@ -1,13 +1,8 @@
 {% extends "layout.html" %}
 
-{% block title %}Hjælp til budgettet{% endblock %}
+{% block title %}Hjælp til SU{% endblock %}
 
-<!DOCTYPE html>
-<html lang="da">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SU-lovgivning</title>
+{% block body %}
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -34,8 +29,7 @@
             margin-bottom: 8px;
         }
     </style>
-</head>
-<body>
+
     <h1>Kort forklaring om SU-lovgivningen</h1>
     <p>SU (Statens Uddannelsesstøtte) er en økonomisk støtte fra den danske stat til studerende, der er indskrevet på en godkendt uddannelse. SU er skabt for at give studerende mulighed for at koncentrere sig om deres uddannelse uden at skulle arbejde fuld tid ved siden af.</p>
 
@@ -60,5 +54,4 @@
     </ul>
 
     <p>For mere information om SU-lovgivningen kan du besøge den officielle SU-side på <a href="https://www.su.dk" target="_blank">www.su.dk</a>.</p>
-</body>
-</html>
+{% endblock %}

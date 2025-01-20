@@ -49,16 +49,14 @@ def check_password(personid: int, password: str):
 
 
 def get_posts(username: str):
-    if session.get("user_id"):
-        posts = list()
-        conn = sqlite3.connect("database.db")
-        conn.row_factory = sqlite3.Row
-        cur = conn.cursor()
-        rows = cur.execute("""SELECT publicMessages.id AS id, username, header, message, category.name AS category_name, picturename, date, (SELECT COUNT(*) FROM comments WHERE messageid = publicMessages.id) AS comment_count 
-                                FROM publicMessages JOIN people ON publicMessages.senderid = people.id JOIN category ON publicMessages.categoryid = category.id 
-                                WHERE people.username = ?""", (username,))
-        for row in rows:
-            posts.append(dict(row))
-        conn.close()
-        return posts
-    return False
+    posts = list()
+    conn = sqlite3.connect("database.db")
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    rows = cur.execute("""SELECT publicMessages.id AS id, username, header, message, category.name AS category_name, picturename, date, (SELECT COUNT(*) FROM comments WHERE messageid = publicMessages.id) AS comment_count 
+                            FROM publicMessages JOIN people ON publicMessages.senderid = people.id JOIN category ON publicMessages.categoryid = category.id 
+                            WHERE people.username = ? ORDER BY date DESC""", (username,))
+    for row in rows:
+        posts.append(dict(row))
+    conn.close()
+    return posts

@@ -216,7 +216,8 @@ def register():
         conn.close()
         return redirect("/")
 
-# TODO: Add public messages in html
+
+@login_required
 @app.route("/myaccount", methods=["GET", "POST"])
 def myaccount():
     if request.method == "GET":
@@ -280,9 +281,9 @@ def messages(post_id):
     cur = conn.cursor()
     rows = cur.execute("""SELECT username, header, message, category.name AS category_name, picturename, date, (SELECT COUNT(*) FROM comments WHERE messageid = publicMessages.id) AS comment_count 
                                 FROM publicMessages JOIN people ON publicMessages.senderid = people.id JOIN category ON publicMessages.categoryid = category.id 
-                                WHERE publicMessages.id = ?""", (post_id,))
+                                WHERE publicMessages.id = ? ORDER BY date DESC""", (post_id,))
     post = dict(rows.fetchone())
-    rows = cur.execute("SELECT date, comment, people.username AS username FROM comments, people WHERE people.id = comments.senderid AND comments.messageid = ?", (post_id,))
+    rows = cur.execute("SELECT date, comment, people.username AS username FROM comments, people WHERE people.id = comments.senderid AND comments.messageid = ? ORDER BY date DESC", (post_id,))
     for row in rows:
         comments.append(dict(row))
     return render_template("post.html", post=post, comments=comments)
@@ -293,6 +294,51 @@ def lektiehjælp():
     return apology("Not made yet :(")
 
 
+@login_required
+@app.route("/lektiehjælp/writepost", methods=["GET", "POST"])
+def writemessage():
+    picture_formats = (".png", ".jpg", ".jpeg", ".svg")
+    if not session.get("user_id"):
+        return redirect("/")
+    if request.method == "GET":
+        return render_template("writepost.html")
+
+    picture = request.files.get("picture", None)
+    header = request.form.get("header")
+    message = request.form.get("message")
+    category = request.form.get("category")
+    if not (header and message and category):
+        return apology("Internal server error", 500)
+    if picture:
+        format_type = ""
+        for format in picture_formats:
+            if picture.filename.endswith(format):
+                format_type = format
+        if format_type:
+            filename = uuid.uuid4().hex + "_post_upload" + format_type
+            picture.save("/postuploads/" + filename)
+    
+    category_id = -1
+    conn = sqlite3.connect("database.db")
+    cur = conn.cursor()
+    cur.execute("SELECT id FROM category WHERE name = ?", (category.title(),))
+    if cur.rowcount > 0:
+        category_id = cur.fetchone()[0]
+    else:
+        cur.execute("INSERT INTO category(name) VALUES(?)", (category.title(),))
+        category_id = cur.lastrowid
+    if picture:
+        cur.execute("INSERT INTO publicMessages(senderid, header, message, categoryid, date, picturename) VALUES(?, ?, ?, ?, (SELECT DATETIME('now'), ?)", (session["user_id"], header, message, category_id, filename))
+        post_id = cur.lastrowid
+    else:
+        cur.execute("INSERT INTO publicMessages(senderid, header, message, categoryid, date) VALUES(?, ?, ?, ?, (SELECT DATETIME('now'), ?)", (session["user_id"], header, message, category_id))
+        post_id = cur.lastrowid
+    conn.commit()
+    conn.close()
+    return redirect("/post/" + post_id)
+
+
+@login_required
 @app.route("/privatemessages/<username>")
 def privatebeskeder(username):
     if username:
