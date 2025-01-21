@@ -356,7 +356,13 @@ def writemessage():
     if not session.get("user_id"):
         return redirect("/")
     if request.method == "GET":
-        return render_template("writepost.html")
+        conn = sqlite3.connect("database.db")
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        rows = cur.execute("SELECT name FROM category")
+        categories = [dict(row) for row in rows]
+        conn.close()
+        return render_template("writepost.html", categories=categories)
 
     picture = request.files.get("picture", None)
     header = request.form.get("header")
@@ -373,24 +379,20 @@ def writemessage():
             filename = uuid.uuid4().hex + "_post_upload" + format_type
             picture.save("/postuploads/" + filename)
     
-    category_id = -1
     conn = sqlite3.connect("database.db")
     cur = conn.cursor()
-    cur.execute("SELECT id FROM category WHERE name = ?", (category.title(),))
-    if cur.rowcount > 0:
-        category_id = cur.fetchone()[0]
-    else:
-        cur.execute("INSERT INTO category(name) VALUES(?)", (category.title(),))
-        category_id = cur.lastrowid
+    cur.execute("SELECT id FROM category WHERE name = ?", (category,))
+    category_id = cur.fetchone()[0]
+
     if picture:
         cur.execute("INSERT INTO publicMessages(senderid, header, message, categoryid, date, picturename) VALUES(?, ?, ?, ?, (SELECT DATETIME('now')), ?)", (session["user_id"], header, message, category_id, filename))
         post_id = cur.lastrowid
     else:
-        cur.execute("INSERT INTO publicMessages(senderid, header, message, categoryid, date) VALUES(?, ?, ?, ?, (SELECT DATETIME('now'), ?)", (session["user_id"], header, message, category_id))
+        cur.execute("INSERT INTO publicMessages(senderid, header, message, categoryid, date) VALUES(?, ?, ?, ?, (SELECT DATETIME('now')))", (session["user_id"], header, message, category_id))
         post_id = cur.lastrowid
     conn.commit()
     conn.close()
-    return redirect("/post/" + post_id)
+    return redirect("/post/" + str(post_id))
 
 
 @app.route("/privatemessages")
@@ -424,10 +426,38 @@ def private_messages():
     rows = cur.execute(query, (session["user_id"],)*6)
     for row in rows:
         messages.append(dict(row))
+    conn.close()
     return render_template("privatemessages.html", messages=messages)
 
 
 @app.route("/privatemessages/<username>")
 @login_required
 def private_messages_user(username):
-    ...
+    conn = sqlite3.connect("database.db")
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    query = """SELECT 
+                CASE 
+                    WHEN privateMessages.senderid = ? THEN privateMessages.recipientid 
+                    WHEN privateMessages.recipientid = ? THEN privateMessages.senderid 
+                END AS other_id, 
+                people.username AS username, 
+                MAX(privateMessages.date) AS latest_date, 
+                (SELECT message 
+                FROM privateMessages 
+                WHERE (senderid = privateMessages.senderid AND recipientid = privateMessages.recipientid) 
+                    OR (senderid = privateMessages.recipientid AND recipientid = privateMessages.senderid)
+                ORDER BY date DESC 
+                LIMIT 1) AS message
+            FROM privateMessages
+            INNER JOIN people
+                ON people.id = CASE 
+                            WHEN privateMessages.senderid = ? THEN privateMessages.recipientid 
+                            WHEN privateMessages.recipientid = ? THEN privateMessages.senderid 
+                        END
+            WHERE (privateMessages.senderid = ? OR privateMessages.recipientid = ?) AND people.username = ?
+            """
+    rows = cur.execute(query, (session["user_id"],)*6 + (username,))
+    messages = [dict(row) for row in rows]
+    conn.close()
+    return render_template("privatemessage.html", messages=messages)

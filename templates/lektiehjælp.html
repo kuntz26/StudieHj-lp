@@ -25,6 +25,9 @@
 
         <button type="submit">Søg</button>
     </form>
+    {% if session["user_id"] %}
+        <a href="/lektiehjælp/writepost">Skriv et opslag</a>
+    {% endif %}
 
     {% include "posts.html" %}
 {% endblock %}

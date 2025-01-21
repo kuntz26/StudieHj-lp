@@ -38,7 +38,7 @@
                     </div>
                     <a href="/lektiehjælp" class="nav-item nav-link">Lektieforum</a>
                     {% if session["user_id"] %}
-                        <a href="/privatemessages/{{ session['username'] }}" class="nav-item nav-link">Private beskeder</a>
+                        <a href="/privatemessages" class="nav-item nav-link">Private beskeder</a>
                     {% endif %}
                 </div>
                 <form action="/lektiehjælp" class="navbar-form form-inline" method="get">

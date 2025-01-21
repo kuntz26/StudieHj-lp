@@ -3,11 +3,17 @@
 {% block title %}Stil et spørgsmål{% endblock %}
 
 {% block body %}
-    <form action="/writepost" method="post" enctype="multipart/form-data">
+    <form action="/lektiehjælp/writepost" method="post" enctype="multipart/form-data">
         <input type="text" name="header" id="header" placeholder="Enter header">
         <input type="text" name="message" id="message" placeholder="Enter message">
-        <input type="text" name="category" id="category" placeholder="Enter category">
+        <select name="category" id="category">
+            <option value="all" disabled>Alle kategorier</option>
+            {% for cat in categories %}
+                <option value="{{ cat.name }}">{{ cat.name }}</option>
+            {% endfor %}
+        </select>
         <input accept=".png, .jpg, .jpeg, .svg" type="file" name="picture" id="picture" onchange="previewImage()">
+        <button type="submit">Submit</button>
     </form>
 
     <!-- This div will hold the image preview -->
