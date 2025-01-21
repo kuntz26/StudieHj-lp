@@ -1,6 +1,4 @@
 /__pycache__/
-/static/pictures/
-/static/uploadfiles/
 /flask_session/
 /Account.csv
 /Test.csv

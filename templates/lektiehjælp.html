@@ -6,7 +6,7 @@
     <h1>Lektiehjælpsforum</h1>
 
     <!-- Search and filter form -->
-    <form method="GET" action="/lektiehjælp">
+    <form method="get" action="/lektiehjælp">
         <input type="text" name="search" placeholder="Søg efter posts..." value="{{ search }}">
         
         <label for="sort">Sorter efter:</label>
@@ -17,9 +17,10 @@
 
         <label for="category">Kategori:</label>
         <select name="category" id="category">
-            <option value="all" {% if category == 'all' %}selected{% endif %}>Alle kategorier</option>
+            <option value="all" disabled>Alle kategorier</option>
             {% for cat in categories %}
-                <option value="{{ cat.name }}" {% if category == cat.name %}selected{% endif %}>{{ cat.name }}</option>
+                <p>{{cat}}</p>
+                <option value="{{ cat.name }}">{{ cat.name }}</option>
             {% endfor %}
         </select>
 

@@ -9,7 +9,7 @@
             <p class="category">Kategori: {{ post.category_name }}</p>
         </div>
         <div class="post-meta">
-            <span class="username">Af: {{ post.username }}</span>
+            <span class="username">Af: <a href="/accounts/{{ post.username }}">{{ post.username }}</a></span>
             <span class="date">Skrevet d. {{ post.date }}</span>
         </div>
         <div class="post-content">
@@ -27,13 +27,19 @@
         {% for comment in comments %}
             <div class="comment">
                 <p><strong>{{ comment.username }}</strong> ({{ comment.date }}):</p>
-                <p>{{ comment.comment }}</p>
+                <p>{{ comment.comment|safe }}</p>
             </div>
         {% endfor %}
+        <script>
+            // Trigger MathJax to process the new LaTeX content
+            window.onload = function() {
+                MathJax.typeset();
+            };
+        </script>
     {% endif %}
 
     {% if session["user_id"] %}
-        <p>Skriv en kommentar:</p>
+        <p>Skriv en kommentar: (Skriv LaTeX kode \\(...\\))</p>
         <form action="/post/{{ post_id }}" method="post">
             <input type="hidden" name="messageid" value="{{ post.id }}">
             <input type="text" name="comment" id="comment" placeholder="Skriv din kommentar" required>

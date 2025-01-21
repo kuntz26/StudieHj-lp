@@ -1,6 +1,6 @@
-import csv, sqlite3, os, secrets, uuid
+import csv, sqlite3, os, secrets, uuid, html
 from datetime import timedelta
-from flask import Flask, redirect, render_template, request, session, url_for
+from flask import Flask, redirect, render_template, request, session, url_for, send_from_directory
 from flask_session import Session
 from bank_transactions import Transactions
 from helpers import apology, parse_number, login_required, check_password, get_posts
@@ -234,9 +234,10 @@ def register():
 @app.route("/myaccount", methods=["GET", "POST"])
 @login_required
 def myaccount():
+    render = render_template("myaccount.html", username=session["username"], user_id=session["user_id"], posts=get_posts(session["username"]))
+    render_success = render_template("myaccount.html", username=session["username"], user_id=session["user_id"], posts=get_posts(session["username"]), message="Success")
     if request.method == "GET":
-        posts = get_posts(session["username"])
-        return render_template("myaccount.html", username=session["username"], user_id=session["user_id"], posts=posts)
+        return render
     else:
         conn = sqlite3.connect("database.db")
         cur = conn.cursor()
@@ -249,15 +250,18 @@ def myaccount():
                     cur.execute("UPDATE people SET username = ? WHERE id = ?", (new_username, session["user_id"]))
                     conn.commit()
                     conn.close()
-                    return render_template("/myaccount", message="Success")
+                    session["username"] = new_username
+                    return render_success
                                 
             case "password_change":
-                if new_password := request.form.get("newpassword") == request.form.get("confirmpassword"):
+                new_password = request.form.get("newpassword")
+                if new_password == request.form.get("confirmpassword"):
                     if check_password(session["user_id"], request.form.get("oldpassword")):
-                        cur.execute("UPDATE login SET password = ? WHERE personid = ?", (new_password, session["user_id"]))
+                        print(new_password)
+                        cur.execute("UPDATE login SET password = ? WHERE personid = ?", (generate_password_hash(new_password), session["user_id"]))
                         conn.commit()
                         conn.close()
-                        return render_template("/myaccount", message="Success")
+                        return render_success
                     conn.close()
                     return apology("Wrong password")
                 conn.close()
@@ -267,9 +271,23 @@ def myaccount():
                 if not check_password(session["user_id"], request.form.get("password")):
                     conn.close()
                     return apology("Wrong password")
-                cur.execute("DELETE FROM login, people WHERE login.personid = people.id AND people.id = ?", (session["user_id"],))
+                # Delete files in people.filename and
+                if session.get("picture_path"):
+                    try:
+                        os.remove("static/pictures/" + session["picture_path"])
+                    except:
+                        pass
+                if session.get("filename"):
+                    try:
+                        os.remove(os.path.join(app.config["UPLOAD_FOLDER"], session["filename"]))
+                    except:
+                        pass
+                cur.execute("DELETE FROM login WHERE personid = ?", (session["user_id"],))
+                cur.execute("UPDATE people SET username = 'deleted' WHERE id = ?", (session["user_id"],))
+                conn.commit()
+                session.clear()
                 conn.close()
-                return render_template("/myaccount", message="Success")
+                return redirect("/")
             
             case _:
                 conn.close()
@@ -278,13 +296,13 @@ def myaccount():
 
 
 @app.route("/accounts/<username>")
-def account(username):
+def account(username: str):
     posts = get_posts(username)
     return render_template("account.html", posts=posts, username=username)
 
 
 @app.route("/post/<post_id>", methods=["GET", "POST"])
-def messages(post_id):
+def messages(post_id: int):
     if request.method == "GET":
         comments = list()
         conn = sqlite3.connect("database.db")
@@ -294,59 +312,70 @@ def messages(post_id):
                                     FROM publicMessages JOIN people ON publicMessages.senderid = people.id JOIN category ON publicMessages.categoryid = category.id 
                                     WHERE publicMessages.id = ? ORDER BY date DESC""", (post_id,))
         post = dict(rows.fetchone())
-        rows = cur.execute("SELECT date, comment, people.username AS username FROM comments, people WHERE people.id = comments.senderid AND comments.messageid = ? ORDER BY date DESC", (post_id,))
+        rows = cur.execute("SELECT date, comment, people.username AS username FROM comments, people WHERE people.id = comments.senderid AND comments.messageid = ? ORDER BY date ASC", (post_id,))
         for row in rows:
-            comments.append(dict(row))
+            temp = dict(row)
+            temp["comment"] = html.escape(temp["comment"])
+            comments.append(temp)
         return render_template("post.html", post=post, comments=comments, post_id=post_id)
     
     if session.get("user_id"):
         if (comment := request.form.get("comment")) and (message_id := request.form.get("messageid")):
             conn = sqlite3.connect("database.db")
             cur = conn.cursor()
-            cur.execute("INSERT INTO comments(date, messageid, comment, senderid) VALUES((SELECT DATETIME('now)), ?, ?, ?)", (message_id, comment, session["user_id"]))
+            cur.execute("INSERT INTO comments(date, messageid, comment, senderid) VALUES((SELECT DATETIME('now')), ?, ?, ?)", (message_id, comment, session["user_id"]))
             conn.commit()
             conn.close()
             return redirect("/post/" + post_id)
 
 
+@app.route('/postuploads/<filename>')
+def uploaded_file(filename: str):
+    return send_from_directory('postuploads', filename)
+
+
 @app.route("/lektiehjælp")
 def lektiehjælp():
-    if (search := request.args.get("search") and (category := request.args.get("category")) and (sort := request.args.get("sort"))):
-        categories = list()
-        posts = list()
-        conn = sqlite3.connect("database.db")
-        conn.row_factory = sqlite3.Row
-        cur = conn.cursor()
+    search = request.args.get("search")
+    category = request.args.get("category")
+    sort = request.args.get("sort")
 
-        rows = cur.execute("SELECT name FROM category")
-        for row in rows:
-            categories.append(row["name"])
-        
+    conn = sqlite3.connect("database.db")
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    rows = cur.execute("SELECT name FROM category")
+    categories = [dict(row) for row in rows.fetchall()]
+    
+    posts = list()
+
+    if search and category and sort:
         if sort == "newest":
             if category == "all":
                 rows = cur.execute("""SELECT publicMessages.id AS id, username, header, message, category.name AS category_name, picturename, date, (SELECT COUNT(*) FROM comments WHERE messageid = publicMessages.id) AS comment_count 
                             FROM publicMessages JOIN people ON publicMessages.senderid = people.id JOIN category ON publicMessages.categoryid = category.id 
-                            WHERE publicMessages.message LIKE ? ORDER BY date DESC""", ("%" + search + "%",))
+                            WHERE publicMessages.message LIKE ? ORDER BY date DESC LIMIT 20""", ("%" + search + "%",))
             else:
                 rows = cur.execute("""SELECT publicMessages.id AS id, username, header, message, category.name AS category_name, picturename, date, (SELECT COUNT(*) FROM comments WHERE messageid = publicMessages.id) AS comment_count 
                             FROM publicMessages JOIN people ON publicMessages.senderid = people.id JOIN category ON publicMessages.categoryid = category.id 
-                            WHERE publicMessages.message LIKE ? AND category_name LIKE ? ORDER BY date DESC""", ("%" + search + "%", category))
+                            WHERE publicMessages.message LIKE ? AND category_name LIKE ? ORDER BY date DESC LIMIT 20""", ("%" + search + "%", category))
         else:
             if category == "all":
                 rows = cur.execute("""SELECT publicMessages.id AS id, username, header, message, category.name AS category_name, picturename, date, (SELECT COUNT(*) FROM comments WHERE messageid = publicMessages.id) AS comment_count 
                             FROM publicMessages JOIN people ON publicMessages.senderid = people.id JOIN category ON publicMessages.categoryid = category.id 
-                            WHERE publicMessages.message LIKE ? ORDER BY RANDOM()""", ("%" + search + "%",))
+                            WHERE publicMessages.message LIKE ? ORDER BY RANDOM() LIMIT 20""", ("%" + search + "%",))
             else:
                 rows = cur.execute("""SELECT publicMessages.id AS id, username, header, message, category.name AS category_name, picturename, date, (SELECT COUNT(*) FROM comments WHERE messageid = publicMessages.id) AS comment_count 
                             FROM publicMessages JOIN people ON publicMessages.senderid = people.id JOIN category ON publicMessages.categoryid = category.id 
-                            WHERE publicMessages.message LIKE ? AND category_name = ? ORDER BY RANDOM()""", ("%" + search + "%", category))
-        
-        for row in rows:
-            posts.append(dict(row))
-        conn.close()
-        return render_template("lektiehjælp.html", posts=posts, categories=categories)
-    
-    return render_template("lektiehjælp.html")
+                            WHERE publicMessages.message LIKE ? AND category_name = ? ORDER BY RANDOM() LIMIT 20""", ("%" + search + "%", category))
+
+    rows = cur.execute("""SELECT publicMessages.id AS id, username, header, message, category.name AS category_name, picturename, date, (SELECT COUNT(*) FROM comments WHERE messageid = publicMessages.id) AS comment_count 
+                            FROM publicMessages JOIN people ON publicMessages.senderid = people.id JOIN category ON publicMessages.categoryid = category.id 
+                            ORDER BY RANDOM() DESC LIMIT 20""")
+
+    for row in rows:
+        posts.append(dict(row))
+    conn.close()
+    return render_template("lektiehjælp.html", posts=posts, categories=categories)
 
 
 @app.route("/lektiehjælp/writepost", methods=["GET", "POST"])
@@ -377,7 +406,7 @@ def writemessage():
                 format_type = format
         if format_type:
             filename = uuid.uuid4().hex + "_post_upload" + format_type
-            picture.save("/postuploads/" + filename)
+            picture.save("postuploads/" + filename)
     
     conn = sqlite3.connect("database.db")
     cur = conn.cursor()
@@ -432,7 +461,7 @@ def private_messages():
 
 @app.route("/privatemessages/<username>")
 @login_required
-def private_messages_user(username):
+def private_messages_user(username: str):
     conn = sqlite3.connect("database.db")
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()

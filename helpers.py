@@ -43,8 +43,10 @@ def check_password(personid: int, password: str):
     conn = sqlite3.connect("database.db")
     cur = conn.cursor()
     rows = cur.execute("SELECT password FROM login WHERE personid = ?", (personid,))
-    if check_password_hash(rows[0][0], password):
+    if check_password_hash(rows.fetchone()[0], password):
+        conn.close()
         return True
+    conn.close()
     return False
 
 
