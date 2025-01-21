@@ -37,11 +37,15 @@
                         </div>
                     </div>
                     <a href="/lektiehjælp" class="nav-item nav-link">Lektieforum</a>
-                    <a href="/privatebeskeder" class="nav-item nav-link">Private beskeder</a>
+                    {% if session["user_id"] %}
+                        <a href="/privatemessages/{{ session['username'] }}" class="nav-item nav-link">Private beskeder</a>
+                    {% endif %}
                 </div>
-                <form class="navbar-form form-inline">
-                    <div class="input-group search-box">								
-                        <input autocomplete="off" type="text" id="search" class="form-control" placeholder="Søg på lektieforums posts">
+                <form action="/lektiehjælp" class="navbar-form form-inline" method="get">
+                    <div class="input-group search-box">
+                        <input autocomplete="off" type="text" id="search" class="form-control" name="search" placeholder="Søg på lektieforums posts">
+                        <input type="hidden" name="sort" value="popular">
+                        <input type="hidden" name="category" value="all">
                         <div class="input-group-append">
                             <span class="input-group-text"><i class="material-icons">&#xE8B6;</i></span>
                         </div>
