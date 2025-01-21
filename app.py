@@ -297,7 +297,7 @@ def messages(post_id):
         rows = cur.execute("SELECT date, comment, people.username AS username FROM comments, people WHERE people.id = comments.senderid AND comments.messageid = ? ORDER BY date DESC", (post_id,))
         for row in rows:
             comments.append(dict(row))
-        return render_template("post.html", post=post, comments=comments)
+        return render_template("post.html", post=post, comments=comments, post_id=post_id)
     
     if session.get("user_id"):
         if (comment := request.form.get("comment")) and (message_id := request.form.get("messageid")):

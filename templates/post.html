@@ -30,13 +30,11 @@
                 <p>{{ comment.comment }}</p>
             </div>
         {% endfor %}
-    {% else %}
-        <p>Ingen kommentarer</p>
     {% endif %}
 
     {% if session["user_id"] %}
         <p>Skriv en kommentar:</p>
-        <form action="/post" method="post">
+        <form action="/post/{{ post_id }}" method="post">
             <input type="hidden" name="messageid" value="{{ post.id }}">
             <input type="text" name="comment" id="comment" placeholder="Skriv din kommentar" required>
         </form>
