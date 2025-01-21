@@ -333,7 +333,7 @@ def messages(post_id: int):
 def uploaded_file(filename: str):
     return send_from_directory('postuploads', filename)
 
-
+# NOT WORKING SEARCH
 @app.route("/lektiehjælp")
 def lektiehjælp():
     search = request.args.get("search")
@@ -368,7 +368,8 @@ def lektiehjælp():
                             FROM publicMessages JOIN people ON publicMessages.senderid = people.id JOIN category ON publicMessages.categoryid = category.id 
                             WHERE publicMessages.message LIKE ? AND category_name = ? ORDER BY RANDOM() LIMIT 20""", ("%" + search + "%", category))
 
-    rows = cur.execute("""SELECT publicMessages.id AS id, username, header, message, category.name AS category_name, picturename, date, (SELECT COUNT(*) FROM comments WHERE messageid = publicMessages.id) AS comment_count 
+    else:
+        rows = cur.execute("""SELECT publicMessages.id AS id, username, header, message, category.name AS category_name, picturename, date, (SELECT COUNT(*) FROM comments WHERE messageid = publicMessages.id) AS comment_count 
                             FROM publicMessages JOIN people ON publicMessages.senderid = people.id JOIN category ON publicMessages.categoryid = category.id 
                             ORDER BY RANDOM() DESC LIMIT 20""")
 
