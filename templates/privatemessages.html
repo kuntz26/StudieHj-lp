@@ -3,15 +3,16 @@
 {% block title %}Private Beskeder{% endblock %}
 
 {% block body %}
-    {% if messages and messages[0].username == "None" %}
+    {% if messages %}
         {% for message in messages %}
             <div>
-                <p><strong><a href="/privatemessages/{{message.username}}">{{ message.username }}</a></strong>: {{ message.message }}</p>
+                <h4><a href="/privatemessages/{{message.username}}">{{ message.other_username }}</a></h4>
+                <p><strong>{{ message.username }}</strong>: {{ message.message }}</p>
                 <p><small>{{ message.latest_date }}</small></p>
             </div>
         {% endfor %}
     {% else %}
         <p>Ingen beskeder :&#40; Vil du gerne skrive til en?</p>
-        <a href="privatemessages/write">Skriv en privat besked til en person</a>
     {% endif %}
+    <a href="/privatemessages/write">Skriv en privat besked til en person</a>
 {% endblock %}

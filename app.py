@@ -1,11 +1,11 @@
 import csv, sqlite3, os, secrets, uuid, html
 from datetime import timedelta
-from flask import Flask, redirect, render_template, request, session, url_for, send_from_directory
+from flask import Flask, redirect, render_template, request, session, url_for, send_from_directory, jsonify
 from flask_session import Session
 from bank_transactions import Transactions
 from helpers import apology, parse_number, login_required, check_password, get_posts
 from werkzeug.utils import secure_filename
-from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.security import generate_password_hash
 
 app = Flask(__name__)
 
@@ -323,7 +323,7 @@ def messages(post_id: int):
         if (comment := request.form.get("comment")) and (message_id := request.form.get("messageid")):
             conn = sqlite3.connect("database.db")
             cur = conn.cursor()
-            cur.execute("INSERT INTO comments(date, messageid, comment, senderid) VALUES((SELECT DATETIME('now')), ?, ?, ?)", (message_id, comment, session["user_id"]))
+            cur.execute("INSERT INTO comments(date, messageid, comment, senderid) VALUES((SELECT DATETIME('now', 'localtime')), ?, ?, ?)", (message_id, comment, session["user_id"]))
             conn.commit()
             conn.close()
             return redirect("/post/" + post_id)
@@ -333,45 +333,36 @@ def messages(post_id: int):
 def uploaded_file(filename: str):
     return send_from_directory('postuploads', filename)
 
-# NOT WORKING SEARCH
+
 @app.route("/lektiehjælp")
 def lektiehjælp():
     search = request.args.get("search")
-    category = request.args.get("category")
-    sort = request.args.get("sort")
+    searchcriteria = request.args.get("searchcriteria")
+
+    if searchcriteria == "newest":
+        order = "date DESC"
+    elif searchcriteria == "popular":
+        order = "comment_count DESC"
+    else:
+        order = "RANDOM()"
+    
+    if search and search != "None":
+        where = f"WHERE message LIKE ?"
+    else:
+        where = ""
 
     conn = sqlite3.connect("database.db")
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
     rows = cur.execute("SELECT name FROM category")
     categories = [dict(row) for row in rows.fetchall()]
+
+    print(where, order)
     
     posts = list()
-
-    if search and category and sort:
-        if sort == "newest":
-            if category == "all":
-                rows = cur.execute("""SELECT publicMessages.id AS id, username, header, message, category.name AS category_name, picturename, date, (SELECT COUNT(*) FROM comments WHERE messageid = publicMessages.id) AS comment_count 
-                            FROM publicMessages JOIN people ON publicMessages.senderid = people.id JOIN category ON publicMessages.categoryid = category.id 
-                            WHERE publicMessages.message LIKE ? ORDER BY date DESC LIMIT 20""", ("%" + search + "%",))
-            else:
-                rows = cur.execute("""SELECT publicMessages.id AS id, username, header, message, category.name AS category_name, picturename, date, (SELECT COUNT(*) FROM comments WHERE messageid = publicMessages.id) AS comment_count 
-                            FROM publicMessages JOIN people ON publicMessages.senderid = people.id JOIN category ON publicMessages.categoryid = category.id 
-                            WHERE publicMessages.message LIKE ? AND category_name LIKE ? ORDER BY date DESC LIMIT 20""", ("%" + search + "%", category))
-        else:
-            if category == "all":
-                rows = cur.execute("""SELECT publicMessages.id AS id, username, header, message, category.name AS category_name, picturename, date, (SELECT COUNT(*) FROM comments WHERE messageid = publicMessages.id) AS comment_count 
-                            FROM publicMessages JOIN people ON publicMessages.senderid = people.id JOIN category ON publicMessages.categoryid = category.id 
-                            WHERE publicMessages.message LIKE ? ORDER BY RANDOM() LIMIT 20""", ("%" + search + "%",))
-            else:
-                rows = cur.execute("""SELECT publicMessages.id AS id, username, header, message, category.name AS category_name, picturename, date, (SELECT COUNT(*) FROM comments WHERE messageid = publicMessages.id) AS comment_count 
-                            FROM publicMessages JOIN people ON publicMessages.senderid = people.id JOIN category ON publicMessages.categoryid = category.id 
-                            WHERE publicMessages.message LIKE ? AND category_name = ? ORDER BY RANDOM() LIMIT 20""", ("%" + search + "%", category))
-
-    else:
-        rows = cur.execute("""SELECT publicMessages.id AS id, username, header, message, category.name AS category_name, picturename, date, (SELECT COUNT(*) FROM comments WHERE messageid = publicMessages.id) AS comment_count 
-                            FROM publicMessages JOIN people ON publicMessages.senderid = people.id JOIN category ON publicMessages.categoryid = category.id 
-                            ORDER BY RANDOM() DESC LIMIT 20""")
+    rows = cur.execute(f"""SELECT publicMessages.id AS id, username, header, message, category.name AS category_name, picturename, date, (SELECT COUNT(*) FROM comments WHERE messageid = publicMessages.id) AS comment_count 
+                        FROM publicMessages JOIN people ON publicMessages.senderid = people.id JOIN category ON publicMessages.categoryid = category.id 
+                        {where} ORDER BY {order} LIMIT 20""", (f"%{search}%",) if where else ())
 
     for row in rows:
         posts.append(dict(row))
@@ -379,9 +370,43 @@ def lektiehjælp():
     return render_template("lektiehjælp.html", posts=posts, categories=categories)
 
 
+@app.route("/lektiehjælp/<category>")
+def lektiehjælp_category(category):
+    search = request.args.get("search")
+    searchcriteria = request.args.get("searchcriteria")
+
+    if searchcriteria == "newest":
+        order = "date DESC"
+    elif searchcriteria == "popular":
+        order = "comment_count DESC"
+    else:
+        order = "RANDOM()"
+    
+    if search and search != "None":
+        where = "AND message LIKE ?"
+    else:
+        where = ""
+    
+    conn = sqlite3.connect("database.db")
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    rows = cur.execute("SELECT name FROM category")
+    categories = [dict(row) for row in rows.fetchall()]
+
+    posts = list()
+    rows = cur.execute(f"""SELECT publicMessages.id AS id, username, header, message, category.name AS category_name, picturename, date, (SELECT COUNT(*) FROM comments WHERE messageid = publicMessages.id) AS comment_count 
+                        FROM publicMessages JOIN people ON publicMessages.senderid = people.id JOIN category ON publicMessages.categoryid = category.id 
+                        WHERE category_name = ? {where} ORDER BY {order} LIMIT 20""", (category, f"%{search}%") if where else (category,))
+
+    for row in rows:
+        posts.append(dict(row))
+    conn.close()
+    return render_template("lektiehjælp_category.html", posts=posts, categories=categories, category=category)
+
+
 @app.route("/lektiehjælp/writepost", methods=["GET", "POST"])
 @login_required
-def writemessage():
+def writepost():
     picture_formats = (".png", ".jpg", ".jpeg", ".svg")
     if not session.get("user_id"):
         return redirect("/")
@@ -415,10 +440,10 @@ def writemessage():
     category_id = cur.fetchone()[0]
 
     if picture:
-        cur.execute("INSERT INTO publicMessages(senderid, header, message, categoryid, date, picturename) VALUES(?, ?, ?, ?, (SELECT DATETIME('now')), ?)", (session["user_id"], header, message, category_id, filename))
+        cur.execute("INSERT INTO publicMessages(senderid, header, message, categoryid, date, picturename) VALUES(?, ?, ?, ?, (SELECT DATETIME('now', 'localtime')), ?)", (session["user_id"], header, message, category_id, filename))
         post_id = cur.lastrowid
     else:
-        cur.execute("INSERT INTO publicMessages(senderid, header, message, categoryid, date) VALUES(?, ?, ?, ?, (SELECT DATETIME('now')))", (session["user_id"], header, message, category_id))
+        cur.execute("INSERT INTO publicMessages(senderid, header, message, categoryid, date) VALUES(?, ?, ?, ?, (SELECT DATETIME('now', 'localtime')))", (session["user_id"], header, message, category_id))
         post_id = cur.lastrowid
     conn.commit()
     conn.close()
@@ -434,9 +459,9 @@ def private_messages():
     cur = conn.cursor()
     query = """SELECT 
                 CASE 
-                    WHEN privateMessages.senderid = ? THEN privateMessages.recipientid 
-                    WHEN privateMessages.recipientid = ? THEN privateMessages.senderid 
-                END AS other_id, 
+                    WHEN privateMessages.senderid = ? THEN (SELECT username FROM people WHERE id = privateMessages.recipientid)
+                    WHEN privateMessages.recipientid = ? THEN (SELECT username FROM people WHERE id = privateMessages.senderid)
+                END AS other_username, 
                 people.username AS username, 
                 MAX(privateMessages.date) AS latest_date, 
                 (SELECT message 
@@ -446,18 +471,40 @@ def private_messages():
                 ORDER BY date DESC 
                 LIMIT 1) AS message
             FROM privateMessages
-            INNER JOIN people
-                ON people.id = CASE 
-                            WHEN privateMessages.senderid = ? THEN privateMessages.recipientid 
-                            WHEN privateMessages.recipientid = ? THEN privateMessages.senderid 
-                        END
+            INNER JOIN people ON people.id = privateMessages.senderid
             WHERE privateMessages.senderid = ? OR privateMessages.recipientid = ? 
             """
-    rows = cur.execute(query, (session["user_id"],)*6)
+    rows = cur.execute(query, (session["user_id"],)*4)
     for row in rows:
         messages.append(dict(row))
     conn.close()
+    if len(messages) < 2 and messages[0]["message"] == None:
+        messages = None
+
     return render_template("privatemessages.html", messages=messages)
+
+
+@app.route("/privatemessages/write", methods=["GET", "POST"])
+@login_required
+def writemessage():
+    if request.method == "GET":
+        return render_template("privatemessage_write.html")
+    
+    username = request.form.get("username")
+    message = request.form.get("message")
+    if not (username and message):
+        return apology("Internal server error", 500)
+    
+    conn = sqlite3.connect("database.db")
+    cur = conn.cursor()
+    rows = cur.execute("SELECT id FROM people WHERE username = ?", (username,))
+    if not (recipient_id := rows.fetchone()[0]):
+        return render_template("privatemessage_write.html", error="Username does not exist")
+    
+    cur.execute("INSERT INTO privateMessages(senderid, recipientid, message, date) VALUES(?, ?, ?, (SELECT DATETIME('now', 'localtime')))", (session["user_id"], recipient_id, message))
+    conn.commit()
+    conn.close()
+    return redirect("/privatemessages/" + username)
 
 
 @app.route("/privatemessages/<username>")
@@ -466,28 +513,24 @@ def private_messages_user(username: str):
     conn = sqlite3.connect("database.db")
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
-    query = """SELECT 
-                CASE 
-                    WHEN privateMessages.senderid = ? THEN privateMessages.recipientid 
-                    WHEN privateMessages.recipientid = ? THEN privateMessages.senderid 
-                END AS other_id, 
-                people.username AS username, 
-                MAX(privateMessages.date) AS latest_date, 
-                (SELECT message 
-                FROM privateMessages 
-                WHERE (senderid = privateMessages.senderid AND recipientid = privateMessages.recipientid) 
-                    OR (senderid = privateMessages.recipientid AND recipientid = privateMessages.senderid)
-                ORDER BY date DESC 
-                LIMIT 1) AS message
-            FROM privateMessages
-            INNER JOIN people
-                ON people.id = CASE 
-                            WHEN privateMessages.senderid = ? THEN privateMessages.recipientid 
-                            WHEN privateMessages.recipientid = ? THEN privateMessages.senderid 
-                        END
-            WHERE (privateMessages.senderid = ? OR privateMessages.recipientid = ?) AND people.username = ?
+    query = """SELECT senderid, message, date, username FROM privateMessages
+            INNER JOIN people ON people.id = senderid
+            WHERE (privateMessages.senderid = ? OR privateMessages.recipientid = ?) AND (recipientid = (SELECT id FROM people WHERE username = ?) OR senderid = (SELECT id FROM people WHERE username = ?))
             """
-    rows = cur.execute(query, (session["user_id"],)*6 + (username,))
+    rows = cur.execute(query, (session["user_id"], session["user_id"], username, username))
     messages = [dict(row) for row in rows]
     conn.close()
-    return render_template("privatemessage.html", messages=messages)
+    return render_template("privatemessage.html", messages=messages, other_username=username)
+
+
+@app.route("/checkusername/<username>")
+def check_username(username):
+    conn = sqlite3.connect("database.db")
+    cur = conn.cursor()
+    result = cur.execute("SELECT username FROM people WHERE username = ?", (username,)).fetchone()
+    conn.close()
+
+    if result:
+        print("Success")
+        return jsonify({'valid': True})
+    return jsonify({'valid': False})

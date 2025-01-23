@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+
+{% block title %}Private Messages{% endblock %}
+
+{% block body %}
+    <h3>{{ other_username }}</h3>
+    {% if messages %}
+        <section class="msger">
+            <main class="msger-chat">
+                {% for message in messages %}
+                    <div class="msg {% if message.senderid == session['user_id'] %}right-msg{% else %}left-msg{% endif %}">
+                        <div class="msg-bubble">
+                            <div class="msg-info">
+                                <div class="msg-info-name">{{ message.username }}</div>
+                                <div class="msg-info-time">{{ message.date }}</div>
+                            </div>
+                            <div class="msg-text">
+                                {{ message.message }}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </main>
+
+            <form class="msger-inputarea">
+                <input type="hidden" name="username" value="{{ other_username }}">
+                <input type="text" class="msger-input" placeholder="Enter your message..." name="message">
+                <button type="submit" class="msger-send-btn">Send</button>
+            </form>
+        </section>
+    {% endif %}
+    <script>
+        window.onload = function() {
+            const chatContainer = document.querySelector('.msger-chat');
+            if (chatContainer) {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+        };
+    </script>
+{% endblock %}

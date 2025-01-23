@@ -1,12 +1,15 @@
 {% extends "layout.html" %}
 
-{% block title %}Lektiehjælpsforum{% endblock %}
+{% block title %}{{ category }}{% endblock %}
 
 {% block body %}
     <h1>Lektiehjælpsforum</h1>
 
+    <h3>Valgt kategori: {{ category }}</h3>
+
+    <a href="/lektiehjælp">Fjern kategori søgning</a>
     <!-- Filter options for viewing posts -->
-    <form action="/lektiehjælp" method="get" style="margin-bottom: 10px;">
+    <form action="/lektiehjælp/{{ category }}" method="get" style="margin-bottom: 10px;">
         <input type="hidden" name="search" id="search" value="{{ request.args.get('search') }}">
         <label>Vis opslag:</label>
         <input type="radio" name="searchcriteria" value="random" {% if request.args.get('searchcriteria') == 'random' %}checked{% endif %} onchange="this.form.submit()"> Tilfældige
@@ -38,6 +41,10 @@
             {% if session["user_id"] %}
                 <a href="/lektiehjælp/writepost">Skriv et opslag</a>
             {% endif %}
+            <form action="/lektiehjælp/{{ category }}" method="get">
+                    <input autocomplete="off" type="text" id="search" class="form-control" name="search" placeholder="Søg efter opslag tekst i denne kategori" value="{{ request.args.get('search') or '' }}">
+                    <input type="hidden" name="searchcriteria" value="random">
+            </form>
         </div>
     </div>
 

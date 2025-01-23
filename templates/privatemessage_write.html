@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+
+{% block title %}Write Private Message{% endblock %}
+
+{% block body %}
+    <h3>Start a private conversation</h3>
+    <p>{{ error }}</p>
+    <form id="messageForm" action="/privatemessages/write" method="post" onsubmit="return validateForm()">
+        <input autofocus type="text" name="username" id="username" placeholder="Username" onblur="get_username('username')" required>
+        <p id="error-message" hidden>Username does not exist</p>
+        <input type="text" name="message" id="message" placeholder="Message" required>
+        <button type="submit">Send</button>
+    </form>
+
+    <script>
+        var usernameValid = false; // Track username validity
+
+        async function get_username(inputId) {
+            var username = document.getElementById(inputId);
+            var errorMessage = document.getElementById("error-message");
+            var username_value = username.value.trim();
+
+            var green = "#21db53";
+            var red = "#e03636";
+
+            if (username_value === "") {
+                username.style.backgroundColor = red;
+                errorMessage.hidden = false;
+                usernameValid = false;
+                return;
+            }
+
+            try {
+                var response = await fetch("/checkusername/" + encodeURIComponent(username_value));
+                var data = await response.json();
+
+                if (data.valid === true) {
+                    username.style.backgroundColor = green;
+                    errorMessage.hidden = true;  // Hide error message
+                    usernameValid = true;
+                } else {
+                    username.style.backgroundColor = red;
+                    errorMessage.hidden = false; // Show error message
+                    usernameValid = false;
+                }
+            } catch (error) {
+                console.error("Error checking username:", error);
+                username.style.backgroundColor = red;
+                errorMessage.hidden = false;
+                usernameValid = false;
+            }
+        }
+
+        function validateForm() {
+            if (!usernameValid) {
+                alert("Please enter a valid username.");
+                return false; // Prevent form submission
+            }
+            return true; // Proceed with form submission
+        }
+    </script>
+{% endblock %}
