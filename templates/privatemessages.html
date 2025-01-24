@@ -3,16 +3,118 @@
 {% block title %}Private Beskeder{% endblock %}
 
 {% block body %}
-    {% if messages %}
-        {% for message in messages %}
-            <div>
-                <h4><a href="/privatemessages/{{message.username}}">{{ message.other_username }}</a></h4>
-                <p><strong>{{ message.username }}</strong>: {{ message.message }}</p>
-                <p><small>{{ message.latest_date }}</small></p>
-            </div>
-        {% endfor %}
-    {% else %}
-        <p>Ingen beskeder :&#40; Vil du gerne skrive til en?</p>
-    {% endif %}
-    <a href="/privatemessages/write">Skriv en privat besked til en person</a>
+    <div class="messages-container">
+        <h1 class="messages-title">Private Beskeder</h1>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message-card">
+                    <h4>
+                        <a href="/privatemessages/{{ message.other_username }}" class="username-link">
+                            {{ message.other_username }}
+                        </a>
+                    </h4>
+                    <p><strong>{{ message.username }}</strong>: {{ message.message }}</p>
+                    <p class="message-date"><small>{{ message.latest_date }}</small></p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="no-messages">Ingen beskeder 😞 Vil du gerne skrive til en?</p>
+        {% endif %}
+
+        <a href="/privatemessages/write" class="write-message-btn">
+            Skriv en privat besked til en person
+        </a>
+    </div>
+
+    <style>
+        .messages-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px;
+            background: #f9f9f9;
+            border: 1px solid #dfe3e8;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .messages-title {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #5c6ac4;
+            font-family: 'Varela Round', sans-serif;
+            margin-bottom: 25px;
+        }
+
+        .message-card {
+            background: #ffffff;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: 1px solid #dfe3e8;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            text-align: left;
+        }
+
+        .username-link {
+            color: #5c6ac4;
+            font-weight: bold;
+            text-decoration: none;
+            font-size: 1.4em;
+        }
+
+        .username-link:hover {
+            text-decoration: underline;
+            color: #3a4db1;
+        }
+
+        .message-date {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .no-messages {
+            font-size: 1.3em;
+            color: #666;
+            font-style: italic;
+        }
+
+        .write-message-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 14px 24px;
+            background: #5c6ac4;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            transition: background 0.3s ease;
+        }
+
+        .write-message-btn:hover {
+            background: #5765c1;
+        }
+
+        @media (max-width: 768px) {
+            .messages-container {
+                max-width: 100%;
+                padding: 20px;
+            }
+
+            .messages-title {
+                font-size: 2em;
+            }
+
+            .message-card {
+                padding: 15px;
+            }
+
+            .write-message-btn {
+                font-size: 1em;
+                padding: 12px 20px;
+            }
+        }
+    </style>
 {% endblock %}

@@ -1,26 +1,98 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Log In
+    Login
 {% endblock %}
 
 {% block body %}
-    <div class="login-container">
-        <h3>Log In</h3>
-        <form action="/login" method="post">
-            <label for="email">Email</label>
-            <input autocomplete="off" autofocus id="email" name="email" placeholder="Enter your email" type="text" required>
-            
-            <label for="password">Password</label>
-            <input id="password" name="password" placeholder="Enter your password" type="password" required>
-            
-            <!-- Uncomment this if needed -->
-            <!-- <label>
-                Remember me: <input type="checkbox" name="remember_me">
-            </label> -->
-            
-            <button type="submit">Log In</button>
-        </form>
-        <a href="/signup" class="signup-link">Don't have an account? Sign up</a>
-    </div>
+    <h3>Login</h3><br>
+    <form action="/login" method="post">
+        <input autocomplete="off" id="email" name="email" placeholder="Email" type="text" required>
+        <input id="password" name="password" placeholder="Password" type="password" required>
+        <button type="submit">Login</button>
+    </form>
+    eller <a href="/register">Opret bruger</a>
+
+    <style>
+        /* Reset any potential margin or padding issues for body, navbar, and content */
+        body, h3, .content {
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Remove any margins from <h3> that could be affecting its position */
+        .content h3 {
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        /* Content section centered */
+        .content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: calc(100vh - 50px); /* Subtract navbar height from full page height */
+            padding-top: 10px; /* Smaller padding-top to avoid large gap */
+        }
+
+        .content form {
+            width: 100%;
+            max-width: 400px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .content input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .content button {
+            width: 100%;
+            padding: 12px;
+            background-color: #0367a6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .content button:hover {
+            background-color: #024e74;
+        }
+
+        .content #error-message {
+            color: red;
+            display: none;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .content h3 {
+                font-size: 1.5rem;
+            }
+
+            .content input {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+
+            .content button {
+                font-size: 1rem;
+            }
+        }
+    </style>
 {% endblock %}

@@ -36,19 +36,162 @@
                 </tbody>
             </table>
         </div>
-
+    
         <div style="flex-grow: 1;">
-            {% if session["user_id"] %}
-                <a href="/lektiehjælp/writepost">Skriv et opslag</a>
-            {% endif %}
-            <form action="/lektiehjælp/{{ category }}" method="get">
-                    <input autocomplete="off" type="text" id="search" class="form-control" name="search" placeholder="Søg efter opslag tekst i denne kategori" value="{{ request.args.get('search') or '' }}">
-                    <input type="hidden" name="searchcriteria" value="random">
+            <div style="text-align: center; margin-bottom: 20px;">
+                {% if session["user_id"] %}
+                    <a href="/lektiehjælp/writepost" class="write-post-btn">
+                        <span class="plus-icon">+</span> Skriv et opslag
+                    </a>
+                {% endif %}
+            </div>
+    
+            <form action="/lektiehjælp/{{ category }}" method="get" style="margin-bottom: 30px; text-align: center;">
+                <input autocomplete="off" type="text" class="form-control" name="search" 
+                       placeholder="Søg efter opslag i denne kategori" 
+                       value="{{ request.args.get('search') or '' }}">
+                <input type="hidden" name="searchcriteria" 
+                       {% if request.args.get('searchcriteria') %} 
+                       value="{{ request.args.get('searchcriteria') }}" 
+                       {% else %} 
+                       value="random" 
+                       {% endif %}>
             </form>
+    
+            <!-- Posts positioned under the search bar -->
+            <div class="posts-container" style="margin-top: 20px;">
+                {% include "posts.html" %}
+            </div>
         </div>
-    </div>
+    </div>    
 
-    <div class="posts-container">
-        {% include "posts.html" %}
-    </div>
+    <style>
+        h1, h2 {
+            color: #5c6ac4;
+            font-family: 'Varela Round', sans-serif;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+        }
+
+        h2 {
+            font-size: 1.8em;
+        }
+
+        form {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1em;
+        }
+
+        form label {
+            font-weight: bold;
+        }
+
+        input[type="radio"] {
+            margin-left: 5px;
+        }
+
+        a {
+            color: #5c6ac4;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .posts-container {
+            width: 80%;
+            margin: 30px auto;
+        }
+
+        .posts-container .post {
+            background: #f9f9f9;
+            border: 1px solid #dfe3e8;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #dfe3e8;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #5c6ac4;
+            color: #fff;
+            font-size: 1.2em;
+        }
+
+        td {
+            background-color: #f9f9f9;
+            font-size: 1em;
+        }
+
+        td a {
+            color: #1D48A0;
+        }
+
+        td a:hover {
+            color: #5c6ac4;
+        }
+
+        .write-post-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 12px 24px;
+            border: 2px solid #dfe3e8;
+            border-radius: 25px;
+            color: #1D48A0;
+            font-size: 1.1em;
+            font-weight: bold;
+            background-color: #fff;
+            transition: all 0.3s ease-in-out;
+            text-decoration: none;
+        }
+
+        .write-post-btn:hover {
+            background-color: #f0f0f0;
+            border-color: #5c6ac4;
+            color: #5c6ac4;
+        }
+
+        .plus-icon {
+            font-size: 1.4em;
+            font-weight: bold;
+            margin-right: 8px;
+            color: #5c6ac4;
+        }
+
+        @media (max-width: 768px) {
+            .posts-container {
+                width: 100%;
+            }
+
+            form {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            table {
+                font-size: 0.9em;
+            }
+        }
+    </style>
 {% endblock %}

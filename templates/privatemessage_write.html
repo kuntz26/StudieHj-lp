@@ -23,7 +23,7 @@
             var green = "#21db53";
             var red = "#e03636";
 
-            if (username_value === "") {
+            if (username_value === "" || username_value === "Slettet") {
                 username.style.backgroundColor = red;
                 errorMessage.hidden = false;
                 usernameValid = false;
@@ -59,4 +59,87 @@
             return true; // Proceed with form submission
         }
     </script>
+
+    <style>
+        /* General Styles for the Form */
+        form {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: 30px auto;
+        }
+
+        /* Form Header */
+        h3 {
+            text-align: center;
+            font-size: 1.5em;
+            color: #5c6ac4;
+            margin-bottom: 15px;
+        }
+
+        /* Input Fields */
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: border-color 0.3s ease-in-out;
+        }
+
+        input[type="text"]:focus {
+            border-color: #5c6ac4;
+            outline: none;
+        }
+
+        /* Button Styling */
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #5c6ac4;
+            color: #fff;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out;
+        }
+
+        button:hover {
+            background-color: #5765c1;
+        }
+
+        /* Error Message Styling */
+        #error-message {
+            color: #e03636;
+            font-size: 0.9em;
+            margin-top: -10px;
+            text-align: center;
+        }
+
+        /* Input Background Colors based on Validity */
+        input[type="text"].invalid {
+            background-color: #f8d7da;
+            border-color: #e03636;
+        }
+
+        input[type="text"].valid {
+            background-color: #d4edda;
+            border-color: #21db53;
+        }
+
+        /* Ensuring responsiveness */
+        @media (max-width: 600px) {
+            form {
+                padding: 15px;
+            }
+
+            input[type="text"], button {
+                font-size: 1em;
+            }
+        }
+    </style>
 {% endblock %}

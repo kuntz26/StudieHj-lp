@@ -3,11 +3,98 @@
 {% block title %}{{ username }}{% endblock %}
 
 {% block body %}
-    <h1>{{ username }}</h1>
-    <a href="/privatemessages/{{username}}">Skriv direkte til denne person</a>
-    {% if posts %}
-        {% include "posts.html" %}
-    {% else %}
-        <p>Du har ikke skrevet nogle offentlige beskeder.</p>    
-    {% endif %}
+    <div class="profile-container">
+        <h1 class="profile-username">{{ username }}</h1>
+        
+        <a href="/privatemessages/{{username}}" class="message-btn">
+            Skriv direkte til denne person
+        </a>
+
+        {% if posts %}
+            <div class="posts-section">
+                {% include "posts.html" %}
+            </div>
+        {% else %}
+            <p class="no-posts-msg">Denne bruger har ikke skrevet nogle offentlige beskeder.</p>    
+        {% endif %}
+    </div>
+
+    <style>
+        .profile-container {
+            max-width: 1000px; /* Increased width */
+            margin: 0 auto;
+            padding: 30px;
+            text-align: center;
+            background: #f9f9f9;
+            border: 1px solid #dfe3e8;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-username {
+            font-size: 2.8em;
+            font-weight: bold;
+            color: #5c6ac4;
+            font-family: 'Varela Round', sans-serif;
+            margin-bottom: 25px;
+        }
+
+        .message-btn {
+            display: inline-block;
+            padding: 14px 24px;
+            background: #5c6ac4;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 1.3em;
+            font-weight: bold;
+            transition: background 0.3s ease;
+        }
+
+        .message-btn:hover {
+            background: #5765c1;
+        }
+
+        .posts-section {
+            margin-top: 40px;
+            text-align: left;
+        }
+
+        .no-posts-msg {
+            font-size: 1.3em;
+            color: #666;
+            font-style: italic;
+            margin-top: 25px;
+        }
+
+        @media (max-width: 1024px) {
+            .profile-container {
+                max-width: 90%;
+            }
+            
+            .profile-username {
+                font-size: 2.4em;
+            }
+
+            .message-btn {
+                font-size: 1.1em;
+                padding: 12px 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .profile-container {
+                padding: 20px;
+            }
+
+            .profile-username {
+                font-size: 2em;
+            }
+
+            .message-btn {
+                font-size: 1em;
+                padding: 10px 18px;
+            }
+        }
+    </style>
 {% endblock %}

@@ -1,51 +1,96 @@
 {% extends "layout.html" %}
 
-{% block title %}Hello World{% endblock %}
+{% block title %}
+    Landing Page - Random Posts
+{% endblock %}
 
 {% block body %}
-    <div class="hagrid">
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
+    <div class="landing-container">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <h1>Welcome to Our Platform!</h1>
+            <p>Explore random posts, get help with budgeting, study resources, and more!</p>
+            <a href="/register" class="btn btn-primary">Join Now</a>
+        </section>
+
+        <!-- Explanation Section -->
+        <section class="explanation-section">
+            <h2>What We Do</h2>
+            <div class="explanation">
+                <div class="explanation-item">
+                    <h3>Budget Calculator</h3>
+                    <p>Calculate your budget and make better financial decisions!</p>
+                </div>
+                <div class="explanation-item">
+                    <h3>Study Forum</h3>
+                    <p>Get help on your homework with our active community!</p>
+                </div>
+                <div class="explanation-item">
+                    <h3>Private Messages</h3>
+                    <p>Send private messages to users on the platform for direct communication.</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="posts-container">
+            {% include "posts.html" %}
+        </div>
     </div>
 
     <style>
-        * {
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background: #f9f9f9;
+            padding: 0;
             margin: 0;
         }
 
-        .hagrid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            grid-template-rows: repeat(4, 1fr);
-            width: 100dvw;
-            height: 100dvh;
-            background-image: url("https://assets.codepen.io/285131/PS1_Haggrid.PNG.webp");
-            background-repeat: no-repeat;
-            background-size: cover;
-            background-position: center;
+        .landing-container {
+            width: 100%;
+            padding: 30px;
+            text-align: center;
         }
 
-        img {
-            max-width: 100%;
-            display: block;
+        .hero-section {
+            background: #0367a6;
+            color: white;
+            padding: 60px 20px;
+            border-radius: 10px;
+            margin-bottom: 50px;
         }
 
-        .hagrid div {
-            border: 4px solid #fff;
+        .hero-section h1 {
+            font-size: 2.5rem;
+        }
+
+        .btn-primary {
+            background-color: #0367a6;
+            color: white;
+            padding: 12px 25px;
+            font-size: 1rem;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .btn-primary:hover {
+            background-color: #024e74;
+        }
+
+        .explanation-section {
+            margin-bottom: 50px;
+        }
+
+        .explanation-item {
+            margin-bottom: 30px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-section h1 {
+                font-size: 2rem;
+            }
         }
     </style>
+
 {% endblock %}

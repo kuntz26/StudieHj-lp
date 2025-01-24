@@ -24,25 +24,83 @@
     </div>
 
     {% if comments %}
-        {% for comment in comments %}
-            <div class="comment">
-                <p><strong>{{ comment.username }}</strong> ({{ comment.date }}):</p>
-                <p>{{ comment.comment|safe }}</p>
-            </div>
-        {% endfor %}
-        <script>
-            // Trigger MathJax to process the new LaTeX content
-            window.onload = function() {
-                MathJax.typeset();
-            };
-        </script>
+        <div class="comments-section">
+            <h3>Kommentarer</h3>
+            {% for comment in comments %}
+                <div class="comment">
+                    <p><strong>{{ comment.username }}</strong> <span class="comment-date">({{ comment.date }})</span>:</p>
+                    <p class="comment-text">{{ comment.comment|safe }}</p>
+                </div>
+            {% endfor %}
+            <script>
+                // Trigger MathJax to process the new LaTeX content
+                window.onload = function() {
+                    MathJax.typeset();
+                };
+            </script>
+        </div>
     {% endif %}
 
     {% if session["user_id"] %}
-        <p>Skriv en kommentar: (Skriv LaTeX kode \\(...\\))</p>
-        <form action="/post/{{ post_id }}" method="post">
-            <input type="hidden" name="messageid" value="{{ post.id }}">
-            <input type="text" name="comment" id="comment" placeholder="Skriv din kommentar" required>
-        </form>
+        <div class="comment-form">
+            <h3>Skriv en kommentar</h3>
+            <p>Du kan bruge LaTeX til matematiske formler: skriv din formel mellem <code>\(...\)</code>, fx: <code>\(x^2 + y^2 = z^2\)</code></p>
+            <form action="/post/{{ post_id }}" method="post">
+                <input type="hidden" name="messageid" value="{{ post.id }}">
+                <textarea name="comment" id="comment" placeholder="Skriv din kommentar her..." required></textarea>
+                <button type="submit">Send kommentar</button>
+            </form>
+        </div>
     {% endif %}
+
+    <style>
+        .comments-section {
+            margin-top: 20px;
+            padding: 15px;
+            border-top: 1px solid #ddd;
+        }
+        .comment {
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+        .comment-date {
+            color: #888;
+            font-size: 0.9em;
+        }
+        .comment-text {
+            margin-top: 5px;
+        }
+        .comment-form {
+            margin-top: 30px;
+        }
+        .comment-form textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        .comment-form button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .comment-form button:hover {
+            background: #0056b3;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
 {% endblock %}

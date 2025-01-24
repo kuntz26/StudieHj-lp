@@ -22,6 +22,7 @@ body {
     padding-right: 16px;
     border-bottom: 1px solid #dfe3e8;
     border-radius: 0;
+    position: fixed;
 }
 
 .nav-link img {
@@ -192,6 +193,9 @@ body {
         display: block;
     }
 }
+
+
+
 
 .posts-container {
     width: 60%;

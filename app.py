@@ -35,7 +35,7 @@ def notfount(e):
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("index.html", post=[{'title': "x", "description": "y"}])
 
 
 @app.route("/budget", methods=["GET", "POST"])
@@ -198,6 +198,8 @@ def logout():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    if session.get("user_id"):
+        return redirect("/")
     if request.method == "GET":
         return render_template("register.html")
     else:
@@ -209,6 +211,9 @@ def register():
             return redirect("/register")
         if username is None or email is None or password is None:
             return apology("Brugernavn, email og/eller password mangler")
+        if username == "Slettet":
+            return apology("Username not possible", 500)
+
         conn = sqlite3.connect("database.db")
         cur = conn.cursor()
         rows = cur.execute("SELECT email FROM login WHERE email = ?", (email,))
@@ -283,7 +288,7 @@ def myaccount():
                     except:
                         pass
                 cur.execute("DELETE FROM login WHERE personid = ?", (session["user_id"],))
-                cur.execute("UPDATE people SET username = 'deleted' WHERE id = ?", (session["user_id"],))
+                cur.execute("UPDATE people SET username = 'Slettet' WHERE id = ?", (session["user_id"],))
                 conn.commit()
                 session.clear()
                 conn.close()
@@ -347,7 +352,7 @@ def lektiehjælp():
         order = "RANDOM()"
     
     if search and search != "None":
-        where = f"WHERE message LIKE ?"
+        where = f"WHERE (message LIKE ? OR header LIKE ?)"
     else:
         where = ""
 
@@ -362,7 +367,7 @@ def lektiehjælp():
     posts = list()
     rows = cur.execute(f"""SELECT publicMessages.id AS id, username, header, message, category.name AS category_name, picturename, date, (SELECT COUNT(*) FROM comments WHERE messageid = publicMessages.id) AS comment_count 
                         FROM publicMessages JOIN people ON publicMessages.senderid = people.id JOIN category ON publicMessages.categoryid = category.id 
-                        {where} ORDER BY {order} LIMIT 20""", (f"%{search}%",) if where else ())
+                        {where} ORDER BY {order} LIMIT 20""", (f"%{search}%", f"%{search}%") if where else ())
 
     for row in rows:
         posts.append(dict(row))
@@ -383,7 +388,7 @@ def lektiehjælp_category(category):
         order = "RANDOM()"
     
     if search and search != "None":
-        where = "AND message LIKE ?"
+        where = "AND (message LIKE ? OR header LIKE ?)"
     else:
         where = ""
     
@@ -396,7 +401,7 @@ def lektiehjælp_category(category):
     posts = list()
     rows = cur.execute(f"""SELECT publicMessages.id AS id, username, header, message, category.name AS category_name, picturename, date, (SELECT COUNT(*) FROM comments WHERE messageid = publicMessages.id) AS comment_count 
                         FROM publicMessages JOIN people ON publicMessages.senderid = people.id JOIN category ON publicMessages.categoryid = category.id 
-                        WHERE category_name = ? {where} ORDER BY {order} LIMIT 20""", (category, f"%{search}%") if where else (category,))
+                        WHERE category_name = ? {where} ORDER BY {order} LIMIT 20""", (category, f"%{search}%", f"%{search}%") if where else (category,))
 
     for row in rows:
         posts.append(dict(row))
@@ -424,6 +429,8 @@ def writepost():
     message = request.form.get("message")
     category = request.form.get("category")
     if not (header and message and category):
+        if not category:
+            return render_template("writepost.html", error="Vælg en kategori")
         return apology("Internal server error", 500)
     if picture:
         format_type = ""
@@ -462,18 +469,11 @@ def private_messages():
                     WHEN privateMessages.senderid = ? THEN (SELECT username FROM people WHERE id = privateMessages.recipientid)
                     WHEN privateMessages.recipientid = ? THEN (SELECT username FROM people WHERE id = privateMessages.senderid)
                 END AS other_username, 
-                people.username AS username, 
-                MAX(privateMessages.date) AS latest_date, 
-                (SELECT message 
-                FROM privateMessages 
-                WHERE (senderid = privateMessages.senderid AND recipientid = privateMessages.recipientid) 
-                    OR (senderid = privateMessages.recipientid AND recipientid = privateMessages.senderid)
-                ORDER BY date DESC 
-                LIMIT 1) AS message
-            FROM privateMessages
-            INNER JOIN people ON people.id = privateMessages.senderid
-            WHERE privateMessages.senderid = ? OR privateMessages.recipientid = ? 
-            """
+                people.username AS username, MAX(privateMessages.date) AS latest_date, privateMessages.message AS message
+                FROM privateMessages
+                INNER JOIN people ON people.id = privateMessages.senderid
+                WHERE privateMessages.senderid = ? OR privateMessages.recipientid = ?
+                GROUP BY other_username ORDER BY privateMessages.date ASC"""
     rows = cur.execute(query, (session["user_id"],)*4)
     for row in rows:
         messages.append(dict(row))
@@ -481,6 +481,7 @@ def private_messages():
     if len(messages) < 2 and messages[0]["message"] == None:
         messages = None
 
+    print(messages)
     return render_template("privatemessages.html", messages=messages)
 
 
@@ -494,11 +495,14 @@ def writemessage():
     message = request.form.get("message")
     if not (username and message):
         return apology("Internal server error", 500)
-    
+    if username == "Slettet":
+        return apology("Can't write to a deleted account")
+
     conn = sqlite3.connect("database.db")
     cur = conn.cursor()
     rows = cur.execute("SELECT id FROM people WHERE username = ?", (username,))
     if not (recipient_id := rows.fetchone()[0]):
+        conn.close()
         return render_template("privatemessage_write.html", error="Username does not exist")
     
     cur.execute("INSERT INTO privateMessages(senderid, recipientid, message, date) VALUES(?, ?, ?, (SELECT DATETIME('now', 'localtime')))", (session["user_id"], recipient_id, message))
@@ -510,6 +514,8 @@ def writemessage():
 @app.route("/privatemessages/<username>")
 @login_required
 def private_messages_user(username: str):
+    if username == session["username"]:
+        return apology("Internal server error", 500)
     conn = sqlite3.connect("database.db")
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
