@@ -40,6 +40,19 @@ class Transactions:
             os.remove(self.new_file)
         except Exception as e:
             print(f"An error occured {e}")
+        
+        try:
+            indtægt = self.transaction_data["Hovedkategori"].pop("Indtægter")
+            self.transaction_data["Hovedkategori"] = {"Indtægter": indtægt, **self.transaction_data["Hovedkategori"]}
+        except:
+            pass
+
+        try:
+            andet = self.transaction_data["Hovedkategori"].pop("Andet")
+            self.transaction_data["Hovedkategori"].update({"Andet": andet})
+        except:
+            pass
+
         return self.transaction_data
 
     def cleanFile(self):

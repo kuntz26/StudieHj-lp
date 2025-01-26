@@ -1,41 +1,83 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Landing Page - Random Posts
+    Studiehjælp
 {% endblock %}
 
 {% block body %}
     <div class="landing-container">
         <!-- Hero Section -->
         <section class="hero-section">
-            <h1>Welcome to Our Platform!</h1>
-            <p>Explore random posts, get help with budgeting, study resources, and more!</p>
-            <a href="/register" class="btn btn-primary">Join Now</a>
+            <img src="/static/Logo.png" alt="Logo billede" height="100px">
+            <h1>Velkommen til <u>Studiehjælp</u></h1>
+            <p>På denne platform kan du som studerende få hjælp og information om budgetlægning, og du kan uploade en fil med dine kontoudtog, hvor du får visualiseret dit forbrug.</p>
+            <p>Du kan også skrive opslag, hvor du får hjælp fra andre personer til problemer fra opgaver eller du kan selv hjælpe andre med deres problemer i opgaver.</p>
+            <p>Sidst men ikke mindst kan du skrive privatbeskeder til andre brugere på platformen!</p>
+            {% if not session["user_id"] %}
+                <a href="/login" class="btn btn-primary">Login</a> eller <a href="/register" class="btn btn-primary">Opret bruger</a>
+            {% endif %}
+            <br><br><p style="font-size: 12px;">Vær opmærksom på, at denne service er beregnet til studerende</p>
         </section>
 
         <!-- Explanation Section -->
-        <section class="explanation-section">
-            <h2>What We Do</h2>
-            <div class="explanation">
-                <div class="explanation-item">
-                    <h3>Budget Calculator</h3>
-                    <p>Calculate your budget and make better financial decisions!</p>
-                </div>
-                <div class="explanation-item">
-                    <h3>Study Forum</h3>
-                    <p>Get help on your homework with our active community!</p>
-                </div>
-                <div class="explanation-item">
-                    <h3>Private Messages</h3>
-                    <p>Send private messages to users on the platform for direct communication.</p>
-                </div>
+        <div class="container">
+            <div class="grid">
+                <!-- Cartão 1 -->
+                <a href="/budget">
+                    <div class="slider-item">
+                        <div class="slider-image-wrapper">
+                            <img class="slider-image" src="/static/Budget_picture.jpg" alt="Budget billede">
+                        </div>
+                        <div class="slider-item-content">
+                            <h2>Budgethjælp</h2>
+                            <p>Her vil du kunne få hjælp til budgettet.</p>
+                        </div>
+                    </div>
+                </a>
+                <!-- Cartão 2 -->
+                <a href="/lektiehjælp">
+                    <div class="slider-item">
+                        <div class="slider-image-wrapper">
+                            <img class="slider-image" src="/static/Lektiehjælp.png" alt="Lektiehjælp billede">
+                        </div>
+                        <div class="slider-item-content">
+                            <h2>Lektiehjælp</h2>
+                            <p>Her vil du kunne få hjælp til lektier.</p>
+                        </div>
+                    </div>
+                </a>
+                <!-- Cartão 3 -->
+                <a href="/privatemessages">
+                    <div class="slider-item">
+                        <div class="slider-image-wrapper">
+                            <img class="slider-image" src="/static/Privatebeskeder.png" alt="Besked billede">
+                        </div>
+                        <div class="slider-item-content">
+                            <h2>Private beskeder</h2>
+                            <p>Her vil du kunne snakke privat med andre. Det er også muligt at hyre en tutor og have kontakt via dette.</p>
+                        </div>
+                    </div>
+                </a>
             </div>
-        </section>
+        </div>
 
         <div class="posts-container">
+            <h2>Visning af tilfældige opslag:</h2>
             {% include "posts.html" %}
         </div>
     </div>
+
+    <script>
+        // Aplica o efeito de tilt aos cartões (From Codepen)
+        document.querySelectorAll('.slider-item').forEach(card => {
+        VanillaTilt.init(card, {
+            max: 10, // Ângulo máximo de inclinação
+            speed: 300, // Velocidade da animação
+            glare: true, // Efeito de brilho
+            "max-glare": 0.1, // Intensidade do brilho
+        });
+        });
+    </script>
 
     <style>
         /* General Styles */
@@ -44,14 +86,23 @@
             background: #f9f9f9;
             padding: 0;
             margin: 0;
+            display: fixed;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
         }
 
+        /* Landing Page Container */
         .landing-container {
             width: 100%;
+            max-width: 1200px;
             padding: 30px;
             text-align: center;
+            margin: 0 auto; /* Ensures centering on larger screens */
         }
 
+        /* Hero Section */
         .hero-section {
             background: #0367a6;
             color: white;
@@ -64,32 +115,124 @@
             font-size: 2.5rem;
         }
 
+        .hero-section img {
+            max-width: 100px;
+            height: auto;
+        }
+
         .btn-primary {
             background-color: #0367a6;
             color: white;
             padding: 12px 25px;
             font-size: 1rem;
             text-decoration: none;
-            border-radius: 5px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-top: 10px;
         }
 
         .btn-primary:hover {
             background-color: #024e74;
         }
 
-        .explanation-section {
-            margin-bottom: 50px;
+        /* Grid Section */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
         }
 
-        .explanation-item {
-            margin-bottom: 30px;
+        /* Responsive adjustments */
+        @media (max-width: 1024px) {
+            .grid {
+                grid-template-columns: repeat(2, 1fr); /* 2 columns for tablets */
+            }
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
             .hero-section h1 {
                 font-size: 2rem;
             }
+
+            .hero-section p {
+                font-size: 1rem;
+            }
+
+            .grid {
+                grid-template-columns: 1fr; /* Stack cards vertically on phones */
+                gap: 15px;
+            }
+
+            .slider-item-content h2 {
+                font-size: 1.3rem;
+            }
+
+            .slider-item-content p {
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Card Styling */
+        .slider-item {
+            background: rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .slider-item:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Image Wrapper */
+        .slider-image-wrapper {
+            height: 200px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .slider-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Content inside cards */
+        .slider-item-content {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .slider-item-content h2 {
+            font-size: 1.5rem;
+            color: #000;
+            margin-bottom: 10px;
+        }
+
+        .slider-item-content p {
+            font-size: 1rem;
+            color: #000;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #000;
+            margin-bottom: 20px; 
+            font-weight: 300;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
     </style>
 

@@ -13,7 +13,7 @@
             <div class="post-content">
                 <p>{{ post.message }}</p>
                 {% if post.picturename %}
-                    <img src="/postuploads/{{ post.picturename }}" alt="Posted image">
+                    <img src="/postuploads/{{ post.picturename }}" alt="Posted image" width="45%">
                 {% endif %}
             </div>
             <div class="post-footer">
@@ -22,3 +22,60 @@
         </div>
     {% endfor %}
 </div>
+
+<style>
+    .posts-container {
+        width: 100%;  /* Use the full width of the page */
+        max-width: 1600px;  /* Increase the max width for larger screens */
+        margin: auto;
+        font-family: Arial, sans-serif;
+        padding: 0 20px;  /* Add some padding to avoid touching screen edges */
+    }
+
+    .post {
+        border: 1px solid #ccc;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+    }
+
+    .post-header h2 {
+        margin: 0;
+    }
+
+    .category {
+        font-size: 0.9em;
+        color: #666;
+    }
+
+    .post-meta {
+        font-size: 0.8em;
+        color: #999;
+    }
+
+    .post-content img {
+        max-width: 100%;
+        display: block;
+        margin: 10px auto 0;
+    }
+
+    .post-footer {
+        margin-top: 10px;
+        font-weight: bold;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1024px) {
+        .posts-container {
+            max-width: 90%;  /* Slightly smaller width for tablets */
+        }
+    }
+
+    @media (max-width: 768px) {
+        .posts-container {
+            max-width: 100%;  /* Use the full screen on mobile devices */
+            padding: 0 10px;
+        }
+    }
+</style>

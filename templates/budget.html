@@ -3,69 +3,75 @@
 {% block title %}Budgetberegner{% endblock %}
 
 {% block body %}
-    {% if error %}
-        <span class="red">{{ error }}</span>
-    {% endif %}
+    <div class="budget-calculator">
+        {% if error %}
+            <span class="red">{{ error }}</span>
+        {% endif %}
 
-    <h1>Budgetberegneren</h1>
-    <h3>På denne side kan du enten manuelt skrive værdier ind, for at få beregnet dit forbrug, 
-        eller du kan uploade en .csv fil, som er eksporteret fra din bank.</h3>
-        <div><a href="/budgethjælp">Hvordan får man et sundt budget?</a><a href="/suhjælp">Hvordan fungerer SU og hvordan er satserne?</a></div>
-    <h5>Upload en fil</h5>
-    <form action="/uploadfile" method="post" id="file" enctype="multipart/form-data">
-        <input type="file" name="file" id="transactions" accept=".csv" required>
-        <input type="submit">
-        <p id="error-message" style="color: red; display: none;">Vælg en .csv fil før du sender.</p>
-    </form>
+        <h1>Budgetberegneren / Forbrugsberegneren</h1>
+        <h3>På denne side kan du enten manuelt skrive værdier ind, for at få beregnet dit forbrug, 
+            eller du kan uploade en .csv fil, som er eksporteret fra din bank.</h3><br>
+        <div class="links-container">
+            <h5>Andre hjælpeværktøjer til budget og økonomi:</h5>
+            <a href="/budgethjælp">Hvordan får man et sundt budget?</a>
+            <a href="/suhjælp">Hvordan fungerer SU og hvordan er satserne?</a>
+        </div><br><br>
+        <h5>Upload en fil</h5>
+        <form action="/uploadfile" method="post" id="file" enctype="multipart/form-data">
+            <h6>Vær opmærksom på at kolonnerne skal være separeret med semikolon (";") og ikke komma (",").</h6>
+            <input type="file" name="file" id="transactions" accept=".csv" required>
+            <input type="submit">
+            <p id="error-message" style="color: red; display: none;">Vælg en .csv fil før du sender.</p>
+        </form>
 
-    <h5>Indtast manuelt. Vælg en periode, og tæl sammen for alle kategorier. Du kan kun indsætte hele tal. <u>Husk at skrive det som negativ værdi, hvis det er en udgift!</u></h5>
-    <form id="choice">
-        <input type="radio" name="choice" value="simple">Simpelt
-        <input type="radio" name="choice" value="advanced">Advanceret
-    </form>
-    <form action="/budget" method="post" name="simple" hidden>
-        <input type="hidden" name="form_type" value="simple">
-        <input autocomplete="off" name="indtægter" placeholder="Indtægter" type="number">
-        <input autocomplete="off" name="udgifter" placeholder="Udgifter" type="number">
-        <button type="submit">Beregn</button>
-    </form>
-    <form action="/budget" method="post" name="advanced" hidden>
-        <input type="hidden" name="form_type" value="advanced">
-        <input autocomplete="off" type="number" name="indtægter" placeholder="Indtægter" id="indtægter">
-        <input autocomplete="off" type="number" name="bolig" placeholder="Bolig udgifter" id="bolig">
-        <input autocomplete="off" type="number" name="øvrige_faste" placeholder="Øvrige faste udgifter" id="øvrige_faste">
-        <input autocomplete="off" type="number" name="transport" placeholder="Transport udgifter" id="transport">
-        <input autocomplete="off" type="number" name="mad" placeholder="Mad udgifter" id="mad">
-        <input autocomplete="off" type="number" name="diverse" placeholder="Diverse" id="diverse">
-        <input autocomplete="off" type="number" name="gældsafvikling" placeholder="Gældsafvikling" id="gældsafvikling">
-        <button type="submit">Beregn</button>
-    </form>
-    
-    {% for group in transactions %}
-        {% for category_name, category_data in group.items() %}
-            <h2>{{ category_name }}</h2> <!-- Display the table name -->
-            <table border="1">
-                <thead>
-                    <tr>
-                        <th>Key</th>
-                        <th>Value</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for key, value in category_data.items() %}
-                    <tr>
-                        <td>{{ key }}</td>
-                        <td>{{ value | replace(".", ",") }} kr</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <h5>Indtast manuelt. Vælg en periode, og tæl sammen for alle kategorier. Du kan kun indsætte hele tal. <br><u>Husk at skrive det som negativ værdi, hvis det er en udgift!</u></h5>
+        <form id="choice">
+            <input type="radio" name="choice" value="simple">Simpelt
+            <input type="radio" name="choice" value="advanced">Advanceret
+        </form>
+        <form action="/budget" method="post" name="simple" hidden>
+            <input type="hidden" name="form_type" value="simple">
+            <input autocomplete="off" name="indtægter" placeholder="Indtægter" type="number">
+            <input autocomplete="off" name="udgifter" placeholder="Udgifter" type="number">
+            <button type="submit">Beregn</button>
+        </form>
+        <form action="/budget" method="post" name="advanced" hidden>
+            <input type="hidden" name="form_type" value="advanced">
+            <input autocomplete="off" type="number" name="indtægter" placeholder="Indtægter" id="indtægter">
+            <input autocomplete="off" type="number" name="bolig" placeholder="Bolig udgifter" id="bolig">
+            <input autocomplete="off" type="number" name="øvrige_faste" placeholder="Øvrige faste udgifter" id="øvrige_faste">
+            <input autocomplete="off" type="number" name="transport" placeholder="Transport udgifter" id="transport">
+            <input autocomplete="off" type="number" name="mad" placeholder="Mad udgifter" id="mad">
+            <input autocomplete="off" type="number" name="diverse" placeholder="Diverse" id="diverse">
+            <input autocomplete="off" type="number" name="gældsafvikling" placeholder="Gældsafvikling" id="gældsafvikling">
+            <button type="submit">Beregn</button>
+        </form>
+        
+        {% for group in transactions %}
+            {% for category_name, category_data in group.items() %}
+                <table border="1">
+                    <thead>
+                        <tr>
+                            <th>Budget poster</th>
+                            <th>Beløb</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for key, value in category_data.items() %}
+                        <tr>
+                            <td>{{ key }}</td>
+                            <td>{{ value | replace(".", ",") }} kr</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endfor %}
         {% endfor %}
-    {% endfor %}
 
-    {% if pictures %}
-        <iframe src="{{ pictures }}" width="50%" height="500px" title="Graf over forbrug"></iframe>
-    {% endif %}
+        {% if pictures %}
+            <iframe src="{{ pictures }}" width="50%" height="500px" title="Graf over forbrug"></iframe>
+        {% endif %}
+    </div>
 
     <script>
         document.querySelector("#choice").addEventListener("click", function(event) {
@@ -103,44 +109,74 @@
     </script>
     
     <style>
-        h1, h3, h5 {
+        .budget-calculator {
+            text-align: center;
+            margin: 20px auto;
+            width: 80%;
+        }
+
+        .budget-calculator h1, 
+        .budget-calculator h3, 
+        .budget-calculator h5 {
             color: #5c6ac4;
             font-family: 'Varela Round', sans-serif;
             text-align: center;
         }
-    
-        h1 {
+
+        .budget-calculator h1 {
             font-size: 2em;
             margin-bottom: 20px;
         }
-    
-        h3 {
+
+        .budget-calculator h3 {
             font-size: 1.5em;
             margin-bottom: 15px;
         }
-    
-        h5 {
+
+        .budget-calculator h5 {
             font-size: 1.2em;
             margin-bottom: 10px;
         }
-    
-        .red {
+
+        .budget-calculator .red {
             color: red;
             font-weight: bold;
         }
-    
-        a {
-            color: #5c6ac4;
-            text-decoration: none;
-            font-weight: bold;
-            margin: 0 10px;
-        }
-    
-        a:hover {
-            text-decoration: underline;
-        }
-    
-        form {
+
+        .budget-calculator .links-container {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .budget-calculator .links-container a {
+        display: inline-block;
+        padding: 12px 20px;
+        background-color: transparent;
+        color: #5c6ac4;
+        text-decoration: none;
+        font-weight: bold;
+        border: 2px solid #5c6ac4;
+        border-radius: 30px;
+        margin: 10px 15px;
+        transition: all 0.3s ease;
+        box-shadow: 0 3px 8px rgba(92, 106, 196, 0.2);
+    }
+
+    .budget-calculator .links-container a:hover {
+        background-color: #5c6ac4;
+        color: #fff;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(92, 106, 196, 0.3);
+    }
+
+    .budget-calculator .links-container a:active {
+        background-color: #5765c1;
+        color: #fff;
+        transform: translateY(0);
+        box-shadow: 0 2px 6px rgba(92, 106, 196, 0.2);
+    }
+
+        .budget-calculator form {
             text-align: center;
             margin: 20px auto;
             width: 50%;
@@ -149,11 +185,11 @@
             border-radius: 8px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
-    
-        input[type="file"],
-        input[type="number"],
-        input[type="submit"],
-        button {
+
+        .budget-calculator input[type="file"],
+        .budget-calculator input[type="number"],
+        .budget-calculator input[type="submit"],
+        .budget-calculator button {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
@@ -161,63 +197,63 @@
             border: 1px solid #dfe3e8;
             font-size: 1em;
         }
-    
-        input[type="file"] {
+
+        .budget-calculator input[type="file"] {
             background: #fff;
         }
-    
-        input[type="submit"],
-        button {
+
+        .budget-calculator input[type="submit"],
+        .budget-calculator button {
             background: #5c6ac4;
             color: #fff;
             border: none;
             cursor: pointer;
         }
-    
-        input[type="submit"]:hover,
-        button:hover {
+
+        .budget-calculator input[type="submit"]:hover,
+        .budget-calculator button:hover {
             background: #5765c1;
         }
-    
-        #error-message {
+
+        .budget-calculator #error-message {
             text-align: center;
             font-weight: bold;
         }
-    
-        table {
+
+        .budget-calculator table {
             width: 80%;
             margin: 20px auto;
             border-collapse: collapse;
         }
-    
-        th, td {
+
+        .budget-calculator th, .budget-calculator td {
             border: 1px solid #dfe3e8;
             padding: 12px;
             text-align: left;
         }
-    
-        th {
+
+        .budget-calculator th {
             background-color: #5c6ac4;
             color: #fff;
         }
-    
-        td {
+
+        .budget-calculator td {
             background-color: #f9f9f9;
         }
-    
-        iframe {
+
+        .budget-calculator iframe {
             display: block;
             margin: 20px auto;
             border: 1px solid #dfe3e8;
             border-radius: 5px;
         }
-    
+
         @media (max-width: 768px) {
-            form {
+            .budget-calculator form {
                 width: 90%;
             }
-    
-            table {
+
+            .budget-calculator table {
                 width: 100%;
             }
         }

@@ -3,14 +3,16 @@
 {% block title %}Write Private Message{% endblock %}
 
 {% block body %}
-    <h3>Start a private conversation</h3>
-    <p>{{ error }}</p>
-    <form id="messageForm" action="/privatemessages/write" method="post" onsubmit="return validateForm()">
-        <input autofocus type="text" name="username" id="username" placeholder="Username" onblur="get_username('username')" required>
-        <p id="error-message" hidden>Username does not exist</p>
-        <input type="text" name="message" id="message" placeholder="Message" required>
-        <button type="submit">Send</button>
-    </form>
+    <div class="write-message">
+        <h3>Start a private conversation</h3>
+        <p>{{ error }}</p>
+        <form id="messageForm" action="/privatemessages/write" method="post" onsubmit="return validateForm()">
+            <input autofocus type="text" name="username" id="username" placeholder="Brugernavn" onblur="get_username('username')" required>
+            <p id="error-message" hidden>Username does not exist</p>
+            <input type="text" name="message" id="message" placeholder="Besked" required>
+            <button type="submit">Send</button>
+        </form>
+    </div>
 
     <script>
         var usernameValid = false; // Track username validity
@@ -62,7 +64,7 @@
 
     <style>
         /* General Styles for the Form */
-        form {
+        .write-message form {
             background: #fff;
             padding: 20px;
             border-radius: 8px;
@@ -72,7 +74,7 @@
         }
 
         /* Form Header */
-        h3 {
+        .write-message h3 {
             text-align: center;
             font-size: 1.5em;
             color: #5c6ac4;
@@ -80,7 +82,7 @@
         }
 
         /* Input Fields */
-        input[type="text"] {
+        .write-message input[type="text"] {
             width: 100%;
             padding: 12px;
             margin: 10px 0;
@@ -90,13 +92,13 @@
             transition: border-color 0.3s ease-in-out;
         }
 
-        input[type="text"]:focus {
+        .write-message input[type="text"]:focus {
             border-color: #5c6ac4;
             outline: none;
         }
 
         /* Button Styling */
-        button {
+        .write-message button {
             width: 100%;
             padding: 12px;
             background-color: #5c6ac4;
@@ -108,12 +110,12 @@
             transition: background-color 0.3s ease-in-out;
         }
 
-        button:hover {
+        .write-message button:hover {
             background-color: #5765c1;
         }
 
         /* Error Message Styling */
-        #error-message {
+        .write-message #error-message {
             color: #e03636;
             font-size: 0.9em;
             margin-top: -10px;
@@ -121,23 +123,23 @@
         }
 
         /* Input Background Colors based on Validity */
-        input[type="text"].invalid {
+        .write-message input[type="text"].invalid {
             background-color: #f8d7da;
             border-color: #e03636;
         }
 
-        input[type="text"].valid {
+        .write-message input[type="text"].valid {
             background-color: #d4edda;
             border-color: #21db53;
         }
 
         /* Ensuring responsiveness */
         @media (max-width: 600px) {
-            form {
+            .write-message form {
                 padding: 15px;
             }
 
-            input[type="text"], button {
+            .write-message input[type="text"], button {
                 font-size: 1em;
             }
         }

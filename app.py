@@ -35,7 +35,16 @@ def notfount(e):
 
 @app.route("/")
 def index():
-    return render_template("index.html", post=[{'title': "x", "description": "y"}])
+    conn = sqlite3.connect("database.db")
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    rows = cur.execute("""SELECT people.username AS username, publicMessages.header AS header, publicMessages.message AS message, category.name AS category_name, 
+                            publicMessages.date AS date, publicMessages.picturename AS picturename, (SELECT COUNT(id) FROM comments WHERE messageid = publicMessages.id) AS comment_count
+                            FROM publicMessages JOIN people ON publicMessages.senderid = people.id JOIN category ON category.id = publicMessages.categoryid
+                            ORDER BY RANDOM() LIMIT 20""")
+    posts = [dict(row) for row in rows]
+    conn.close()
+    return render_template("index.html", posts=posts)
 
 
 @app.route("/budget", methods=["GET", "POST"])
@@ -96,7 +105,7 @@ def budget():
         for key in transaction_dict_list[0][group]:
             total += transaction_dict_list[0][group][key]
             total = round(total)
-        transaction_dict_list[0][group]["Rest beløb"] = total
+        transaction_dict_list[0][group]["Rådighedsbeløb"] = total
         return render_template("budget.html", error=request.args.get("error"), transactions=transaction_dict_list, pictures=picture_url)
     return render_template("budget.html", error=request.args.get("error"))
 
@@ -313,7 +322,8 @@ def messages(post_id: int):
         conn = sqlite3.connect("database.db")
         conn.row_factory = sqlite3.Row
         cur = conn.cursor()
-        rows = cur.execute("""SELECT publicMessages.id AS id, username, header, message, category.name AS category_name, picturename, date, (SELECT COUNT(*) FROM comments WHERE messageid = publicMessages.id) AS comment_count 
+        rows = cur.execute("""SELECT publicMessages.id AS id, username, header, message, category.name AS category_name, picturename, date, (SELECT COUNT(*) FROM comments 
+                                    WHERE messageid = publicMessages.id) AS comment_count 
                                     FROM publicMessages JOIN people ON publicMessages.senderid = people.id JOIN category ON publicMessages.categoryid = category.id 
                                     WHERE publicMessages.id = ? ORDER BY date DESC""", (post_id,))
         post = dict(rows.fetchone())
@@ -359,15 +369,16 @@ def lektiehjælp():
     conn = sqlite3.connect("database.db")
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
-    rows = cur.execute("SELECT name FROM category")
+    rows = cur.execute("SELECT name FROM category ORDER BY name")
     categories = [dict(row) for row in rows.fetchall()]
 
     print(where, order)
     
     posts = list()
-    rows = cur.execute(f"""SELECT publicMessages.id AS id, username, header, message, category.name AS category_name, picturename, date, (SELECT COUNT(*) FROM comments WHERE messageid = publicMessages.id) AS comment_count 
-                        FROM publicMessages JOIN people ON publicMessages.senderid = people.id JOIN category ON publicMessages.categoryid = category.id 
-                        {where} ORDER BY {order} LIMIT 20""", (f"%{search}%", f"%{search}%") if where else ())
+    rows = cur.execute(f"""SELECT publicMessages.id AS id, username, header, message, category.name AS category_name, picturename, date, 
+                            (SELECT COUNT(*) FROM comments WHERE messageid = publicMessages.id) AS comment_count 
+                            FROM publicMessages JOIN people ON publicMessages.senderid = people.id JOIN category ON publicMessages.categoryid = category.id 
+                            {where} ORDER BY {order} LIMIT 20""", (f"%{search}%", f"%{search}%") if where else ())
 
     for row in rows:
         posts.append(dict(row))
@@ -399,9 +410,10 @@ def lektiehjælp_category(category):
     categories = [dict(row) for row in rows.fetchall()]
 
     posts = list()
-    rows = cur.execute(f"""SELECT publicMessages.id AS id, username, header, message, category.name AS category_name, picturename, date, (SELECT COUNT(*) FROM comments WHERE messageid = publicMessages.id) AS comment_count 
-                        FROM publicMessages JOIN people ON publicMessages.senderid = people.id JOIN category ON publicMessages.categoryid = category.id 
-                        WHERE category_name = ? {where} ORDER BY {order} LIMIT 20""", (category, f"%{search}%", f"%{search}%") if where else (category,))
+    rows = cur.execute(f"""SELECT publicMessages.id AS id, username, header, message, category.name AS category_name, picturename, date, 
+                            (SELECT COUNT(*) FROM comments WHERE messageid = publicMessages.id) AS comment_count 
+                            FROM publicMessages JOIN people ON publicMessages.senderid = people.id JOIN category ON publicMessages.categoryid = category.id 
+                            WHERE category_name = ? {where} ORDER BY {order} LIMIT 20""", (category, f"%{search}%", f"%{search}%") if where else (category,))
 
     for row in rows:
         posts.append(dict(row))
@@ -447,10 +459,12 @@ def writepost():
     category_id = cur.fetchone()[0]
 
     if picture:
-        cur.execute("INSERT INTO publicMessages(senderid, header, message, categoryid, date, picturename) VALUES(?, ?, ?, ?, (SELECT DATETIME('now', 'localtime')), ?)", (session["user_id"], header, message, category_id, filename))
+        cur.execute("INSERT INTO publicMessages(senderid, header, message, categoryid, date, picturename) VALUES(?, ?, ?, ?, (SELECT DATETIME('now', 'localtime')), ?)", 
+                    (session["user_id"], header, message, category_id, filename))
         post_id = cur.lastrowid
     else:
-        cur.execute("INSERT INTO publicMessages(senderid, header, message, categoryid, date) VALUES(?, ?, ?, ?, (SELECT DATETIME('now', 'localtime')))", (session["user_id"], header, message, category_id))
+        cur.execute("INSERT INTO publicMessages(senderid, header, message, categoryid, date) VALUES(?, ?, ?, ?, (SELECT DATETIME('now', 'localtime')))", 
+                    (session["user_id"], header, message, category_id))
         post_id = cur.lastrowid
     conn.commit()
     conn.close()
@@ -505,7 +519,8 @@ def writemessage():
         conn.close()
         return render_template("privatemessage_write.html", error="Username does not exist")
     
-    cur.execute("INSERT INTO privateMessages(senderid, recipientid, message, date) VALUES(?, ?, ?, (SELECT DATETIME('now', 'localtime')))", (session["user_id"], recipient_id, message))
+    cur.execute("INSERT INTO privateMessages(senderid, recipientid, message, date) VALUES(?, ?, ?, (SELECT DATETIME('now', 'localtime')))", 
+                (session["user_id"], recipient_id, message))
     conn.commit()
     conn.close()
     return redirect("/privatemessages/" + username)
@@ -520,9 +535,9 @@ def private_messages_user(username: str):
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
     query = """SELECT senderid, message, date, username FROM privateMessages
-            INNER JOIN people ON people.id = senderid
-            WHERE (privateMessages.senderid = ? OR privateMessages.recipientid = ?) AND (recipientid = (SELECT id FROM people WHERE username = ?) OR senderid = (SELECT id FROM people WHERE username = ?))
-            """
+                INNER JOIN people ON people.id = senderid
+                WHERE (privateMessages.senderid = ? OR privateMessages.recipientid = ?) AND (recipientid = (SELECT id FROM people WHERE username = ?) OR 
+                senderid = (SELECT id FROM people WHERE username = ?))"""
     rows = cur.execute(query, (session["user_id"], session["user_id"], username, username))
     messages = [dict(row) for row in rows]
     conn.close()

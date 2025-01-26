@@ -3,49 +3,111 @@
 {% block title %}Hjælp til SU{% endblock %}
 
 {% block body %}
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            margin: 20px;
-            background-color: #f9f9f9;
-            color: #333;
-        }
-        h1 {
-            color: #0056b3;
-        }
-        h2 {
-            color: #444;
-            margin-top: 20px;
-        }
-        p {
-            margin: 10px 0;
-        }
-        ul {
-            margin: 10px 0;
-            padding-left: 20px;
-        }
-        li {
-            margin-bottom: 8px;
-        }
-    </style>
-
-    <h1>Kort forklaring om SU-lovgivningen</h1>
-    <p>SU (Statens Uddannelsesstøtte) er en økonomisk støtte fra den danske stat til studerende, der er indskrevet på en godkendt uddannelse. SU er skabt for at give studerende mulighed for at koncentrere sig om deres uddannelse uden at skulle arbejde fuld tid ved siden af.</p>
-
-    <h2>Hvem kan få SU?</h2>
-    <ul>
-        <li>Du skal være fyldt 18 år og være optaget på en SU-berettiget uddannelse.</li>
-        <li>Du skal have dansk statsborgerskab eller opfylde særlige betingelser som udenlandsk studerende.</li>
-        <li>Du må ikke modtage anden offentlig støtte til forsørgelse (fx kontanthjælp).</li>
-    </ul>
+    <h1>SU. Hvem kan få det og hvad kan man få</h1>
+    <div class="su-container">
+        <div class="su-text-container">
+            <p>
+                SU (Statens Uddannelsesstøtte) er en økonomisk støtte fra den danske stat til studerende, der er indskrevet på en godkendt uddannelse.
+                SU er skabt for at give studerende mulighed for at koncentrere sig om deres uddannelse uden at skulle arbejde fuld tid ved siden af.
+            </p>
+            <h2>Hvem kan få SU?</h2>
+            <ul class="su-text">
+                <li>Du skal være fyldt 18 år og være optaget på en SU-berettiget uddannelse.</li>
+                <li>Du skal have dansk statsborgerskab eller opfylde særlige betingelser som udenlandsk studerende.</li>
+                <li>Du må ikke modtage anden offentlig støtte til forsørgelse (fx kontanthjælp).</li>
+                <li>Du kan først få SU fra kvartalet efter du bliver 18 år, og du kan først søge om det måneden før det nye kvartals start.</li>
+            </ul>
+        </div>
+        <img src="/static/SU skema.png" alt="Søg om SU som 18-årig" class="su-image">
+    </div>
 
     <h2>Hvad kan du få i SU?</h2>
-    <p>SU'en består af to dele:</p>
-    <ul>
-        <li><strong>Stipendium</strong> – Et fast månedligt beløb, afhængigt af din alder, din bopæl (hjemmeboende eller udeboende) og uddannelsestype.</li>
-        <li><strong>SU-lån</strong> – Et frivilligt lån, som du kan optage ud over dit stipendium. Lånet skal betales tilbage efter endt uddannelse.</li>
-    </ul>
+    <div class="container">
+        <div id="start">
+            <h2>Sats i 2025</h2>
+            Din SU-sats afhænger af:
+            <ul>
+                <li>Hvilken uddannelsestype du går på</li>
+                <li>Hvor gammel du er (hvis du går på en ungdomsuddannelse)</li>
+                <li>Om du i SU-sammenhæng er ude- eller hjemmeboende</li>
+                <li>Og i særlige tilfælde, hvornår du startede på din uddannelse</li>
+            </ul>
+            <h3>Guide: Hvor meget kan jeg få i SU i 2025?</h3>
+            Klik dig igennem guiden, og find ud af, hvilken SU-sats du kan få.
+            <button onclick="showSection('uddannelse');">Start</button>
+        </div>
+        <div id="uddannelse" hidden>
+            <button class="back" onclick="showSection('start')">Tilbage</button>
+            <h3>Hvilken uddannelse går du på?</h3>
+            <button onclick="showSection('ungdomsuddannelse');">Ungdomsuddannelse</button> <button onclick="showSection('videregående_uddannelse');">Videregående uddannelse</button>
+            <p>Ungdomsuddannelser er for eksempel gymnasium, hf, GSK, enkeltfag, visse uddannelser på folkeskoleniveau. <a href="https://su.dk/su/om-su-til-ungdomsuddannelser/godkendte-ungdomsuddannelser-mv" target="_blank">Se godkendte ungdomsuddannelser</a>
+            Videregående uddannelser er for eksempel universiteter, journalistuddannelsen, læreruddannelsen m.v.</p>
+        </div>
+        <div id="ungdomsuddannelse" hidden>
+            <button class="back" onclick="showSection('uddannelse')">Tilbage</button>
+            <h3>Hvor bor du?</h3>
+            <button onclick="showSection('ungdomsuddannelse_hjemmeboende');">Jeg bor hos mine forældre (hjemmeboende)</button> <button onclick="showSection('ungdomsuddannelse_udeboende');">Jeg er flyttet hjemmefra (udeboende)</button>
+        </div>
+        <div id="ungdomsuddannelse_hjemmeboende" hidden>
+            <button class="back" onclick="showSection('ungdomsuddannelse')">Tilbage</button>
+            <h3>Det ser ud til, at du kan få 1.101 kroner før skat + eventuelt et tillæg</h3>
+            <p>Når du går på en ungdomsuddannelse og er hjemmeboende, er din SU afhængig af dine forældres indkomst.</p>
+            <p>Det betyder, at du kan få grundsatsen på 1.101 kr. før skat + eventuelt et tillæg. Størrelsen på tillægget er afhængig af dine forældres indkomst.</p>
+            <a href="https://su.dk/satser/videregaaende-uddannelser-satser-for-su-til-hjemmeboende" target="_blank">Læs mere, og se en oversigt over SU-satser afhængig af dine forældres indkomst</a>
+        </div>
+        <div id="ungdomsuddannelse_udeboende" hidden>
+            <button class="back" onclick="showSection('ungdomsuddannelse')">Tilbage</button>
+            <h3>Hvor gammel er du?</h3>
+            <button onclick="showSection('ungdomsuddannelse_udeboende_18_19');">Jeg er 18-19 år</button> <button onclick="showSection('ungdomsuddannelse_udeboende_20');">Jeg er 20 år eller derover</button>
+        </div>
+        <div id="ungdomsuddannelse_udeboende_18_19" hidden>
+            <button class="back" onclick="showSection('ungdomsuddannelse_udeboende')">Tilbage</button>
+            <h3>Er du godkendt til udeboendesatsen?</h3>
+            <p>Hvis du er 18 eller 19 år og går på en ungdomsuddannelse, skal du have en særlig godkendelse til at få SU med udeboendesats, også selv om du er flyttet hjemmefra.</p>
+            <p>Har du søgt om og fået særlig godkendelse til at få SU med udeboendesats?</p>
+            <button onclick="showSection('ungdomsuddannelse_udeboende_18_19_nej');">Nej, jeg er ikke godkendt til udeboendesatsen</button> <button onclick="showSection('ungdomsuddannelse_udeboende_18_19_ja');">Ja, jeg er allerede godkendt til udeboendesatsen</button>
+            <p><a href="https://su.dk/su/om-su-til-ungdomsuddannelser/bopael-og-su-satser" target="_blank">Se reglerne for at blive godkendt til udeboendesatsen</a></p>
+            <p>Har du et barn, og er du udeboende, skal du dog ikke søge om særlig godkendelse, men får automatisk <a href="https://su.dk/satser/ungdomsuddannelse-satser-for-su-til-udeboende" target="_blank">udeboendesatsen for 20-årige eller derover</a>.</p>
+        </div>
+        <div id="ungdomsuddannelse_udeboende_18_19_nej" hidden>
+            <button class="back" onclick="showSection('ungdomsuddannelse_udeboende_18_19')">Tilbage</button>
+            <h3>Det ser ud til, at du kan få 1.101 kroner før skat + eventuelt et tillæg</h3>
+            <p>Går du på en ungdomsuddannelse og er 18 eller 19 år, kan du normalt kun få SU-satsen for hjemmeboende, selvom du måske er flyttet hjemmefra.</p>
+            <p>Det betyder, at du kan få grundsatsen på 1.101 kr. før skat + eventuelt et tillæg. Størrelsen på tillægget er afhængig af dine forældres indkomst.</p>
+            <p><a href="https://su.dk/satser/ungdomsuddannelse-satser-for-su-til-hjemmeboende" target="_blank"></a>Se en oversigt over SU-satser afhængig af dine forældres indkomst (hjemmeboende)</p>
+        </div>
+        <div id="ungdomsuddannelse_udeboende_18_19_ja" hidden>
+            <button class="back" onclick="showSection('ungdomsuddannelse_udeboende_18_19')">Tilbage</button>
+            <h3>Det ser ud til, at du kan få 4.546 kroner før skat + eventuelt et tillæg</h3>
+            <p>Når du går på en ungdomsuddannelse, er 18 eller 19 år og er blevet godkendt til udeboendesatsen, kan du få:</p>
+            <p>4.546 kroner + eventuelt et tillæg. Størrelsen på tillægget er afhængig af dine forældres indkomst.</p>
+            <p><a href="https://su.dk/satser/ungdomsuddannelse-satser-for-su-til-udeboende" target="_blank"></a>Læs mere, og se en oversigt over SU-satser afhængig af dine forældres indkomst</p>
+        </div>
+        <div id="ungdomsuddannelse_udeboende_20" hidden>
+            <button class="back" onclick="showSection('ungdomsuddannelse_udeboende')">Tilbage</button>
+            <h3>Det ser ud til, at du kan få 7.086 kroner før skat</h3>
+            <p>Går du på en ungdomsuddannelse, er 20 år eller derover og udeboende, kan du få 7.086 kroner før skat.</p>
+            <a href="https://su.dk/satser/ungdomsuddannelse-satser-for-su-til-udeboende" target="_blank">SU-satser for udeboende på en ungdomsuddannelse</a>
+        </div>
+        <div id="videregående_uddannelse" hidden>
+            <button class="back" onclick="showSection('uddannelse')">Tilbage</button>
+            <h3>Hvor bor du?</h3>
+            <button onclick="showSection('videregående_uddannelse_hjemmeboende');">Jeg bor hos mine forældre (hjemmeboende)</button> <button onclick="showSection('videregående_uddannelse_udeboende');">Jeg er flyttet hjemmefra (udeboende)</button>
+        </div>
+        <div id="videregående_uddannelse_hjemmeboende" hidden>
+            <button class="back" onclick="showSection('videregående_uddannelse')">Tilbage</button>
+            <h3>Det ser ud til, at du kan få 1.101 kroner før skat + eventuelt et tillæg</h3>
+            <p>Når du går på en videregående uddannelse og er hjemmeboende, er din SU afhængig af dine forældres indkomst.</p>
+            <p>Det betyder, at du kan få grundsatsen på 1.101 kr. før skat + eventuelt et tillæg. Størrelsen på tillægget er afhængig af dine forældres indkomst.</p>
+            <p><a href="https://su.dk/satser/videregaaende-uddannelser-satser-for-su-til-hjemmeboende" target="_blank"></a>Læs mere, og se en oversigt over SU-satser afhængig af dine forældres indkomst</p>
+        </div>
+        <div id="videregående_uddannelse_udeboende" hidden>
+            <button class="back" onclick="showSection('videregående_uddannelse')">Tilbage</button>
+            <h3>Det ser ud til at du kan få 7.086 kroner før skat</h3>
+            <p>Går du på en videregående uddannelse, og er du udeboende kan du få 7.086 kroner</p>
+            <p><a href="https://su.dk/satser/videregaaende-uddannelser-satser-for-su-til-udeboende" target="_blank">Se SU-satsen for udeboende</a></p>
+        </div>        
+    </div>
 
     <h2>Særlige regler for SU</h2>
     <ul>
@@ -54,4 +116,146 @@
     </ul>
 
     <p>For mere information om SU-lovgivningen kan du besøge den officielle SU-side på <a href="https://www.su.dk" target="_blank">www.su.dk</a>.</p>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        
+        h1 {
+            color: #0056b3;
+        }
+        
+        h2 {
+            color: #444;
+            margin-top: 20px;
+        }
+
+        h3 {
+            color: #28506e;
+        }
+        
+        p {
+            margin: 10px 0;
+        }
+        
+        ul {
+           margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+
+        .su-container {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .su-text {
+            min-width: 300px;
+        }
+        
+        .su-image {
+            max-width: 400px;
+            min-width: 300px;
+            width: 100%;
+        }
+
+        .container {
+            padding: 20px;
+            border: 1px solid #ddd;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        button {
+            background-color: #0056b3;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #003d82;
+        }
+
+        .back {
+            background-color: transparent;
+            color: #0056b3;
+            border: 2px solid #0056b3;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: none;
+        }
+
+        .back:hover {
+            background-color: #0056b3;
+            color: white;
+        }
+    </style>
+
+    <script>
+        function start_pressed() {
+            // Hide #start and show #uddannelse
+        }
+
+        function videregående_uddannelse() {
+            // Hide #uddannelse and show #videregående_uddannelse
+        }
+
+        function ungdomsuddannelse() {
+            // Hide #uddannelse and show #ungdomsuddannelse
+        }
+
+        function ungdomsuddannelse_hjemmeboende() {
+            // Hide #ungdomsuddannelse and show #ungdomsuddannelse_hjemmeboende
+        }
+
+        function ungdomsuddannelse_udeboende() {
+            // Hide #ungdomsuddannelse and show #ungdomsuddannelse_udeboende
+        }
+
+        function ungdomsuddannelse_udeboende_18_19() {
+            // Hide #ungdomsuddannelse_udeboende and show #ungdomsuddannelse_udeboende_18_19
+        }
+
+        function ungdomsuddannelse_udeboende_18_19_ja() {
+            // Hide #ungdomsuddannelse_udeboende_18_19 and show #ungdomsuddannelse_udeboende_18_19_ja
+        }
+
+        function ungdomsuddannelse_udeboende_18_19_nej() {
+            // Hide #ungdomsuddannelse_udeboende_18_19 and show #ungdomsuddannelse_udeboende_18_19_nej
+        }
+
+        function ungdomsuddannelse_udeboende_20() {
+            // Hide #ungdomsuddannelse_udeboende and show #ungdomsuddannelse_udeboende_20
+        }
+
+        function videregående_uddannelse_hjemmeboende() {
+            // Hide #videregående_uddannelse and show #videregående_uddannelse_hjemmeboende
+        }
+
+        function videregående_uddannelse_udeboende() {
+            // Hide #videregående_uddannelse and show #videregående_uddannelse_udeboende
+        }
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.container > div').forEach(div => {
+                div.hidden = true;
+            });
+            document.getElementById(sectionId).hidden = false;
+        }
+    </script>
 {% endblock %}
