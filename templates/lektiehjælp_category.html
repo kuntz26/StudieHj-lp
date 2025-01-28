@@ -3,85 +3,87 @@
 {% block title %}{{ category }}{% endblock %}
 
 {% block body %}
-    <h1>Lektiehjælpsforum</h1>
+    <div class="lektiehjælp">
+        <h1>Lektiehjælpsforum</h1>
 
-    <h3>Valgt kategori: {{ category }}</h3>
+        <h3>Valgt kategori: {{ category }}</h3>
 
-    <a href="/lektiehjælp">Fjern kategori søgning</a>
-    <!-- Filter options for viewing posts -->
-    <form action="/lektiehjælp/{{ category }}" method="get" style="margin-bottom: 10px;">
-        <input type="hidden" name="search" id="search" value="{{ request.args.get('search') }}">
-        <label>Vis opslag:</label>
-        <input type="radio" name="searchcriteria" value="random" {% if request.args.get('searchcriteria') == 'random' %}checked{% endif %} onchange="this.form.submit()"> Tilfældige
-        <input type="radio" name="searchcriteria" value="newest" {% if request.args.get('searchcriteria') == 'newest' %}checked{% endif %} onchange="this.form.submit()"> Nyeste
-        <input type="radio" name="searchcriteria" value="popular" {% if request.args.get('searchcriteria') == 'popular' %}checked{% endif %} onchange="this.form.submit()"> Flest kommentarer
-    </form>
+        <a href="/lektiehjælp">Fjern kategori søgning</a>
+        <!-- Filter options for viewing posts -->
+        <form action="/lektiehjælp/{{ category }}" method="get" style="margin-bottom: 10px;">
+            <input type="hidden" name="search" id="search" value="{{ request.args.get('search') }}">
+            <label>Vis opslag:</label>
+            <input type="radio" name="searchcriteria" value="random" {% if request.args.get('searchcriteria') == 'random' %}checked{% endif %} onchange="this.form.submit()"> Tilfældige
+            <input type="radio" name="searchcriteria" value="newest" {% if request.args.get('searchcriteria') == 'newest' %}checked{% endif %} onchange="this.form.submit()"> Nyeste
+            <input type="radio" name="searchcriteria" value="popular" {% if request.args.get('searchcriteria') == 'popular' %}checked{% endif %} onchange="this.form.submit()"> Flest kommentarer
+        </form>
 
-    <div style="display: flex; align-items: flex-start; gap: 20px;">
-        <!-- Categories Table -->
-        <div>
-            <h2>Kategorier</h2>
-            <table border="1">
-                <thead>
-                    <tr>
-                        <th>Kategori</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for cat in categories %}
-                    <tr>
-                        <td><a href="/lektiehjælp/{{ cat.name }}">{{ cat.name }}</a></td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    
-        <div style="flex-grow: 1;">
-            <div style="text-align: center; margin-bottom: 20px;">
-                {% if session["user_id"] %}
-                    <a href="/lektiehjælp/writepost" class="write-post-btn">
-                        <span class="plus-icon">+</span> Skriv et opslag
-                    </a>
-                {% endif %}
+        <div style="display: flex; align-items: flex-start; gap: 20px;">
+            <!-- Categories Table -->
+            <div>
+                <h2>Kategorier</h2>
+                <table border="1">
+                    <thead>
+                        <tr>
+                            <th>Kategori</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cat in categories %}
+                        <tr>
+                            <td><a href="/lektiehjælp/{{ cat.name }}">{{ cat.name }}</a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-    
-            <form action="/lektiehjælp/{{ category }}" method="get" style="margin-bottom: 30px; text-align: center;">
-                <input autocomplete="off" type="text" class="form-control" name="search" 
-                       placeholder="Søg efter opslag i denne kategori" 
-                       value="{{ request.args.get('search') or '' }}">
-                <input type="hidden" name="searchcriteria" 
-                       {% if request.args.get('searchcriteria') %} 
-                       value="{{ request.args.get('searchcriteria') }}" 
-                       {% else %} 
-                       value="random" 
-                       {% endif %}>
-            </form>
-    
-            <!-- Posts positioned under the search bar -->
-            <div class="posts-container" style="margin-top: 20px;">
-                {% include "posts.html" %}
+        
+            <div style="flex-grow: 1;">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    {% if session["user_id"] %}
+                        <a href="/lektiehjælp/writepost" class="write-post-btn">
+                            <span class="plus-icon">+</span> Skriv et opslag
+                        </a>
+                    {% endif %}
+                </div>
+        
+                <form action="/lektiehjælp/{{ category }}" method="get" style="margin-bottom: 30px; text-align: center;">
+                    <input autocomplete="off" type="text" class="form-control" name="search" 
+                        placeholder="Søg efter opslag i denne kategori" 
+                        value="{{ request.args.get('search') or '' }}">
+                    <input type="hidden" name="searchcriteria" 
+                        {% if request.args.get('searchcriteria') %} 
+                        value="{{ request.args.get('searchcriteria') }}" 
+                        {% else %} 
+                        value="random" 
+                        {% endif %}>
+                </form>
+        
+                <!-- Posts positioned under the search bar -->
+                <div class="posts-container" style="margin-top: 20px;">
+                    {% include "posts.html" %}
+                </div>
             </div>
-        </div>
-    </div>    
+        </div> 
+    </div>   
 
     <style>
-        h1, h2 {
+        .lektiehjælp h1, .lektiehjælp h2 {
             color: #5c6ac4;
             font-family: 'Varela Round', sans-serif;
             text-align: center;
             margin-bottom: 20px;
         }
 
-        h1 {
+        .lektiehjælp h1 {
             font-size: 2.5em;
         }
 
-        h2 {
+        .lektiehjælp h2 {
             font-size: 1.8em;
         }
 
-        form {
+        .lektiehjælp form {
             display: flex;
             justify-content: center;
             align-items: center;
@@ -89,30 +91,30 @@
             font-size: 1.1em;
         }
 
-        form label {
+        .lektiehjælp form label {
             font-weight: bold;
         }
 
-        input[type="radio"] {
+        .lektiehjælp input[type="radio"] {
             margin-left: 5px;
         }
 
-        a {
+        .lektiehjælp a {
             color: #5c6ac4;
             text-decoration: none;
             font-weight: bold;
         }
 
-        a:hover {
+        .lektiehjælp a:hover {
             text-decoration: underline;
         }
 
-        .posts-container {
+        .lektiehjælp .posts-container {
             width: 80%;
             margin: 30px auto;
         }
 
-        .posts-container .post {
+        .lektiehjælp .posts-container .post {
             background: #f9f9f9;
             border: 1px solid #dfe3e8;
             border-radius: 8px;
@@ -121,38 +123,38 @@
             box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
         }
 
-        table {
+        .lektiehjælp table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
         }
 
-        th, td {
+        .lektiehjælp th, .lektiehjælp td {
             border: 1px solid #dfe3e8;
             padding: 12px;
             text-align: left;
         }
 
-        th {
+        .lektiehjælp th {
             background-color: #5c6ac4;
             color: #fff;
             font-size: 1.2em;
         }
 
-        td {
+        .lektiehjælp td {
             background-color: #f9f9f9;
             font-size: 1em;
         }
 
-        td a {
+        .lektiehjælp td a {
             color: #1D48A0;
         }
 
-        td a:hover {
+        .lektiehjælp td a:hover {
             color: #5c6ac4;
         }
 
-        .write-post-btn {
+        .lektiehjælp .write-post-btn {
             display: inline-flex;
             align-items: center;
             padding: 12px 24px;
@@ -166,13 +168,13 @@
             text-decoration: none;
         }
 
-        .write-post-btn:hover {
+        .lektiehjælp .write-post-btn:hover {
             background-color: #f0f0f0;
             border-color: #5c6ac4;
             color: #5c6ac4;
         }
 
-        .plus-icon {
+        .lektiehjælp .plus-icon {
             font-size: 1.4em;
             font-weight: bold;
             margin-right: 8px;
@@ -180,16 +182,16 @@
         }
 
         @media (max-width: 768px) {
-            .posts-container {
+            .lektiehjælp .posts-container {
                 width: 100%;
             }
 
-            form {
+            .lektiehjælp form {
                 flex-direction: column;
                 align-items: center;
             }
 
-            table {
+            .lektiehjælp table {
                 font-size: 0.9em;
             }
         }

@@ -16,8 +16,8 @@
             <a href="/budgethjælp">Hvordan får man et sundt budget?</a>
             <a href="/suhjælp">Hvordan fungerer SU og hvordan er satserne?</a>
         </div><br><br>
-        <h5>Upload en fil</h5>
-        <form action="/uploadfile" method="post" id="file" enctype="multipart/form-data">
+        <h5>Upload en .csv fil downloaded fra din bank</h5>
+        <form action="/uploadfile" method="post" id="file" enctype="multipart/form-data" onsubmit="return validateForm()">
             <h6>Vær opmærksom på at kolonnerne skal være separeret med semikolon (";") og ikke komma (",").</h6>
             <input type="file" name="file" id="transactions" accept=".csv" required>
             <input type="submit">
@@ -90,22 +90,30 @@
             }
         });
 
-        document.querySelector("#file").addEventListener("submit", function(event) {
+        function validateForm() {
             let fileInput = document.querySelector("#transactions");
             let errorMessage = document.querySelector("#error-message");
 
+            // Check if the file input is empty
             if (!fileInput.files || fileInput.files.length === 0) {
-                // Show an error message if no file is selected
                 errorMessage.style.display = "block";
                 errorMessage.textContent = "Vælg en .csv fil før du sender.";
-                
-                // Prevent form submission
-                event.preventDefault();
-            } else {
-                // Hide the error message if a file is selected
-                errorMessage.style.display = "none";
+                return false;  // Prevent form submission
             }
-        });
+
+            // Check if the uploaded file is a .csv file
+            const file = fileInput.files[0];
+            const fileName = file.name.toLowerCase();
+            if (!fileName.endsWith(".csv")) {
+                errorMessage.style.display = "block";
+                errorMessage.textContent = "Filformatet er ikke tilladt. Vælg en .csv fil.";
+                return false;  // Prevent form submission
+            }
+
+            // Hide the error message if the file is valid
+            errorMessage.style.display = "none";
+            return true;  // Allow form submission
+        }
     </script>
     
     <style>

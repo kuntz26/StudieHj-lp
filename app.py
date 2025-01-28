@@ -38,7 +38,7 @@ def index():
     conn = sqlite3.connect("database.db")
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
-    rows = cur.execute("""SELECT people.username AS username, publicMessages.header AS header, publicMessages.message AS message, category.name AS category_name, 
+    rows = cur.execute("""SELECT people.username AS username, publicMessages.header AS header, publicMessages.message AS message, category.name AS category_name, people.grade AS grade,
                             publicMessages.date AS date, publicMessages.picturename AS picturename, (SELECT COUNT(id) FROM comments WHERE messageid = publicMessages.id) AS comment_count
                             FROM publicMessages JOIN people ON publicMessages.senderid = people.id JOIN category ON category.id = publicMessages.categoryid
                             ORDER BY RANDOM() LIMIT 20""")
@@ -92,21 +92,25 @@ def budget():
     
     if filename:
         group = "Hovedkategori"
-        transactions = Transactions(filename)
-        transaction_dict_list = list()
-        transaction_dict_list.append(transactions.transactions(group))
-        picture_path = os.path.join(app.root_path, "static", "pictures", f"{uuid.uuid4().hex}_picture.html")
-        transaction_pic_name = transactions.makePlot(transaction_dict_list[0][group], picture_path)
-        if old_picture := session.get("picture_path"):
-            os.remove(old_picture)
-        session["picture_path"] = picture_path
-        picture_url = url_for('static', filename=f'pictures/{os.path.basename(picture_path)}')
-        total = 0
-        for key in transaction_dict_list[0][group]:
-            total += transaction_dict_list[0][group][key]
-            total = round(total)
-        transaction_dict_list[0][group]["Rådighedsbeløb"] = total
-        return render_template("budget.html", error=request.args.get("error"), transactions=transaction_dict_list, pictures=picture_url)
+        try:
+            transactions = Transactions(filename)
+            transaction_dict_list = list()
+            transaction_dict_list.append(transactions.transactions(group))
+        except:
+            pass
+        else:
+            picture_path = os.path.join(app.root_path, "static", "pictures", f"{uuid.uuid4().hex}_picture.html")
+            transaction_pic_name = transactions.makePlot(transaction_dict_list[0][group], picture_path)
+            if old_picture := session.get("picture_path"):
+                os.remove(old_picture)
+            session["picture_path"] = picture_path
+            picture_url = url_for('static', filename=f'pictures/{os.path.basename(picture_path)}')
+            total = 0
+            for key in transaction_dict_list[0][group]:
+                total += transaction_dict_list[0][group][key]
+                total = round(total)
+            transaction_dict_list[0][group]["Rådighedsbeløb"] = total
+            return render_template("budget.html", error=request.args.get("error"), transactions=transaction_dict_list, pictures=picture_url)
     return render_template("budget.html", error=request.args.get("error"))
 
 
@@ -122,7 +126,7 @@ def upload_file():
     if file is None or file.filename == "":
         return redirect("/budget?error=Ingen fil uploaded")
     if not file.filename.endswith(".csv"): # Can use regex: re.search(r"^.+\.csv$", file.filename)
-        return redirect("/budget?error=Uploaded er ikke en csv fil", error="")
+        return redirect("/budget?error=Uploaded er ikke en csv fil")
     filename = uuid.uuid4().hex + "_file_upload" + ".csv"
     file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
     
@@ -170,7 +174,7 @@ def login():
         
         conn = sqlite3.connect("database.db")
         cur = conn.cursor()
-        rows = cur.execute("SELECT id, username, email, filename FROM people, login WHERE people.id = login.personid AND email = ?", (email,))
+        rows = cur.execute("SELECT id, username, email, filename, grade FROM people, login WHERE people.id = login.personid AND email = ?", (email,))
         output = list(rows)
         if len(output) != 1:
             conn.close()
@@ -181,6 +185,7 @@ def login():
         
         session["user_id"] = output[0][0]
         session["username"] = output[0][1]
+        session["grade"] = output[0][4]
 #        if request.form.get("remember_me") == "on":
 #            session.permanent = True  # Default session behavior
 #        else:
@@ -207,21 +212,26 @@ def logout():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    grades = ["Folkeskole", "Gymnasie", "Universitet", "Erhvervsuddannelse", "Andet"]
     if session.get("user_id"):
         return redirect("/")
+    
     if request.method == "GET":
         return render_template("register.html")
     else:
         username = request.form.get("username")
+        grade = request.form.get("grade")
         email = request.form.get("email")
         password = request.form.get("password")
         confirm_password = request.form.get("confirm_password")
         if password != confirm_password:
-            return redirect("/register")
-        if username is None or email is None or password is None:
-            return apology("Brugernavn, email og/eller password mangler")
+            return redirect("/register?error=Ikke samme passwords")
+        if username is None or email is None or password is None or grade is None:
+            return apology("Brugernavn, Niveau, email og/eller password mangler")
         if username == "Slettet":
             return apology("Username not possible", 500)
+        if grade not in grades:
+            return apology("Internal server error", 500)
 
         conn = sqlite3.connect("database.db")
         cur = conn.cursor()
@@ -233,12 +243,13 @@ def register():
             return apology("Brugernavn i brug allerede")
         
         if filename := session.get("filename"):
-            cur.execute("INSERT INTO people(username, filename) VALUES(?, ?)", (username, filename))
+            cur.execute("INSERT INTO people(username, filename, grade) VALUES(?, ?, ?)", (username, filename, grade))
         else:
-            cur.execute("INSERT INTO people(username) VALUES(?)", (username,))
+            cur.execute("INSERT INTO people(username, grade) VALUES(?, ?)", (username, grade))
         
         session["user_id"] = int(cur.lastrowid)
         session["username"] = username
+        session["grade"] = grade
         cur.execute("INSERT INTO login(personid, email, password) VALUES(?, ?, ?)", (session["user_id"], email, generate_password_hash(password)))
         conn.commit()
         conn.close()
@@ -248,8 +259,8 @@ def register():
 @app.route("/myaccount", methods=["GET", "POST"])
 @login_required
 def myaccount():
-    render = render_template("myaccount.html", username=session["username"], user_id=session["user_id"], posts=get_posts(session["username"]))
-    render_success = render_template("myaccount.html", username=session["username"], user_id=session["user_id"], posts=get_posts(session["username"]), message="Success")
+    render = render_template("myaccount.html", username=session["username"], user_id=session["user_id"], posts=get_posts(session["username"]), grade=session["grade"])
+    render_success = render_template("myaccount.html", username=session["username"], user_id=session["user_id"], posts=get_posts(session["username"]), grade=session["grade"], message="Success")
     if request.method == "GET":
         return render
     else:
@@ -296,6 +307,7 @@ def myaccount():
                         os.remove(os.path.join(app.config["UPLOAD_FOLDER"], session["filename"]))
                     except:
                         pass
+                
                 cur.execute("DELETE FROM login WHERE personid = ?", (session["user_id"],))
                 cur.execute("UPDATE people SET username = 'Slettet' WHERE id = ?", (session["user_id"],))
                 conn.commit()
@@ -303,6 +315,19 @@ def myaccount():
                 conn.close()
                 return redirect("/")
             
+            case "grade_change":
+                grades = ["Folkeskole", "Gymnasie", "Universitet", "Erhvervsuddannelse", "Andet"]
+                if not check_password(session["user_id"], request.form.get("password")):
+                    conn.close()
+                    return apology("Wrong password")
+                if new_grade := request.form.get("grade"):
+                    if not new_grade in grades:
+                        return apology("Internal server error", 500)
+                    cur.execute("UPDATE people SET grade = ? WHERE id = ?", (new_grade, session["user_id"]))
+                    conn.commit()
+                    session["grade"] = new_grade
+                    return render_success
+
             case _:
                 conn.close()
                 return apology("Internal server error", 500)
@@ -311,8 +336,7 @@ def myaccount():
 
 @app.route("/accounts/<username>")
 def account(username: str):
-    posts = get_posts(username)
-    return render_template("account.html", posts=posts, username=username)
+    return render_template("account.html", posts=get_posts(username), username=username)
 
 
 @app.route("/post/<post_id>", methods=["GET", "POST"])
@@ -371,15 +395,11 @@ def lektiehjælp():
     cur = conn.cursor()
     rows = cur.execute("SELECT name FROM category ORDER BY name")
     categories = [dict(row) for row in rows.fetchall()]
-
-    print(where, order)
-    
     posts = list()
-    rows = cur.execute(f"""SELECT publicMessages.id AS id, username, header, message, category.name AS category_name, picturename, date, 
+    rows = cur.execute(f"""SELECT publicMessages.id AS id, username, header, message, category.name AS category_name, picturename, date, people.grade AS grade,
                             (SELECT COUNT(*) FROM comments WHERE messageid = publicMessages.id) AS comment_count 
                             FROM publicMessages JOIN people ON publicMessages.senderid = people.id JOIN category ON publicMessages.categoryid = category.id 
                             {where} ORDER BY {order} LIMIT 20""", (f"%{search}%", f"%{search}%") if where else ())
-
     for row in rows:
         posts.append(dict(row))
     conn.close()
@@ -408,9 +428,9 @@ def lektiehjælp_category(category):
     cur = conn.cursor()
     rows = cur.execute("SELECT name FROM category")
     categories = [dict(row) for row in rows.fetchall()]
-
+    
     posts = list()
-    rows = cur.execute(f"""SELECT publicMessages.id AS id, username, header, message, category.name AS category_name, picturename, date, 
+    rows = cur.execute(f"""SELECT publicMessages.id AS id, username, header, message, category.name AS category_name, picturename, date, people.grade AS grade,
                             (SELECT COUNT(*) FROM comments WHERE messageid = publicMessages.id) AS comment_count 
                             FROM publicMessages JOIN people ON publicMessages.senderid = people.id JOIN category ON publicMessages.categoryid = category.id 
                             WHERE category_name = ? {where} ORDER BY {order} LIMIT 20""", (category, f"%{search}%", f"%{search}%") if where else (category,))
@@ -445,6 +465,7 @@ def writepost():
             return render_template("writepost.html", error="Vælg en kategori")
         return apology("Internal server error", 500)
     if picture:
+        filename = ""
         format_type = ""
         for format in picture_formats:
             if picture.filename.endswith(format):
@@ -459,6 +480,8 @@ def writepost():
     category_id = cur.fetchone()[0]
 
     if picture:
+        if not filename:
+            return apology("Can only add pictures", 500)
         cur.execute("INSERT INTO publicMessages(senderid, header, message, categoryid, date, picturename) VALUES(?, ?, ?, ?, (SELECT DATETIME('now', 'localtime')), ?)", 
                     (session["user_id"], header, message, category_id, filename))
         post_id = cur.lastrowid
@@ -492,7 +515,10 @@ def private_messages():
     for row in rows:
         messages.append(dict(row))
     conn.close()
-    if len(messages) < 2 and messages[0]["message"] == None:
+    if not len(messages) == 0:
+        if len(messages) < 2 and messages[0]["message"] == None:
+            messages = None
+    else:
         messages = None
 
     print(messages)

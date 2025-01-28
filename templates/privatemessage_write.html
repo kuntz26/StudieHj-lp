@@ -8,7 +8,7 @@
         <p>{{ error }}</p>
         <form id="messageForm" action="/privatemessages/write" method="post" onsubmit="return validateForm()">
             <input autofocus type="text" name="username" id="username" placeholder="Brugernavn" onblur="get_username('username')" required>
-            <p id="error-message" hidden>Username does not exist</p>
+            <p id="error-message" hidden>Brugernavn findes ikke</p>
             <input type="text" name="message" id="message" placeholder="Besked" required>
             <button type="submit">Send</button>
         </form>
@@ -55,7 +55,7 @@
 
         function validateForm() {
             if (!usernameValid) {
-                alert("Please enter a valid username.");
+                alert("Skriv et valid brugernavn.");
                 return false; // Prevent form submission
             }
             return true; // Proceed with form submission

@@ -9,6 +9,7 @@
             <div class="post-meta">
                 <span class="username">Af: <a href="{% if post.username != 'Slettet' %}/accounts/{{ post.username }} {% else %}#{% endif %}">{{ post.username }}</a></span>
                 <span class="date">Skrevet d. {{ post.date }}</span>
+                <span class="grade">Niveau: {{ post.grade }}</span>
             </div>
             <div class="post-content">
                 <p>{{ post.message }}</p>
@@ -17,7 +18,7 @@
                 {% endif %}
             </div>
             <div class="post-footer">
-                <span class="comments">{{ post.comment_count }} kommentarer</span>
+                <a href="/post/{{ post.id }}"><span class="comments">{{ post.comment_count }} kommentarer</span></a>
             </div>
         </div>
     {% endfor %}

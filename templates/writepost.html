@@ -3,86 +3,25 @@
 {% block title %}Stil et spørgsmål{% endblock %}
 
 {% block body %}
-    <style>
-        /* General form styling */
-        form {
-            max-width: 500px;
-            margin: 0 auto;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            background: #f9f9f9;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        input, select, button {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-            box-sizing: border-box;
-        }
-
-        input:focus, select:focus, button:focus {
-            border-color: #007bff;
-            outline: none;
-            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-        }
-
-        button {
-            background: #007bff;
-            color: white;
-            cursor: pointer;
-            font-weight: bold;
-            border: none;
-            transition: background 0.3s ease;
-        }
-
-        button:hover {
-            background: #0056b3;
-        }
-
-        /* Image preview styling */
-        #imagePreviewContainer {
-            margin-top: 20px;
-            text-align: center;
-        }
-
-        #imagePreviewContainer img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            text-align: center;
-            font-size: 28px;
-            color: #333;
-        }
-    </style>
-
-    <h1>Stil et spørgsmål</h1>
-    <form id="questionForm" action="/lektiehjælp/writepost" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
-        <input type="text" name="header" id="header" placeholder="Enter header" required>
-        <input type="text" name="message" id="message" placeholder="Enter message" required>
+    <div class="write-post">
+        <h1>Stil et spørgsmål</h1>
+        <form id="questionForm" action="/lektiehjælp/writepost" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
+            <input type="text" name="header" id="header" placeholder="Enter header" required>
+            <input type="text" name="message" id="message" placeholder="Enter message" required>
+            
+            <select name="category" id="category" required>
+                <option value="all" disabled selected>Alle kategorier</option>
+                {% for cat in categories %}
+                    <option value="{{ cat.name }}">{{ cat.name }}</option>
+                {% endfor %}
+            </select>
         
-        <select name="category" id="category" required>
-            <option value="all" disabled selected>Alle kategorier</option>
-            {% for cat in categories %}
-                <option value="{{ cat.name }}">{{ cat.name }}</option>
-            {% endfor %}
-        </select>
-    
-        <p id="error" style="color: red;">{{ error }}</p>
-    
-        <input accept=".png, .jpg, .jpeg, .svg" type="file" name="picture" id="picture" onchange="previewImage()">
-        <button type="submit">Submit</button>
-    </form>
+            <p id="error" style="color: red;">{{ error }}</p>
+            <p>Upload et billede (.png, .jpg, .jpeg eller .svg)</p>
+            <input accept=".png, .jpg, .jpeg, .svg" type="file" name="picture" id="picture" onchange="previewImage()">
+            <button type="submit">Submit</button>
+        </form>
+    </div>
 
     <!-- This div will hold the image preview -->
     <div id="imagePreviewContainer"></div>
@@ -115,9 +54,22 @@
         function validateForm() {
             const category = document.getElementById("category").value;
             const errorMessage = document.getElementById("error");
+            const fileInput = document.getElementById("picture");
+            const file = fileInput.files[0];
 
+            // Check if category is selected
             if (category === "all") {
-                errorMessage.textContent = "Vælg en kategori";  // Show error message
+                errorMessage.textContent = "Vælg en kategori";  // Show error message for category
+                return false;  // Prevent form submission
+            }
+
+            // Check if the uploaded file is a valid image format
+            const allowedFormats = [".png", ".jpg", ".jpeg", ".svg"];
+            const fileName = file ? file.name.toLowerCase() : "";
+            const isValidFormat = allowedFormats.some(format => fileName.endsWith(format));
+
+            if (file && !isValidFormat) {
+                errorMessage.textContent = "Filformatet er ikke tilladt. Vælg en billedfil (.png, .jpg, .jpeg, .svg)";  // Show error message for invalid file
                 return false;  // Prevent form submission
             }
 
@@ -125,4 +77,67 @@
             return true;  // Allow form submission
         }
     </script>
+
+    <style>
+        /* General form styling */
+        .write-post form {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9f9f9;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .write-post input, .write-post select, .write-post button {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .write-post input:focus, .write-post select:focus, .write-post button:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+        .write-post button {
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            border: none;
+            transition: background 0.3s ease;
+        }
+
+        .write-post button:hover {
+            background: #0056b3;
+        }
+
+        /* Image preview styling */
+        #imagePreviewContainer {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #imagePreviewContainer img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .write-post h1 {
+            text-align: center;
+            font-size: 28px;
+            color: #333;
+        }
+    </style>
 {% endblock %}

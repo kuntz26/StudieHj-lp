@@ -9,6 +9,17 @@
     <form action="/register" method="post">
         <input autocomplete="off" autofocus id="username" name="username" placeholder="Brugernavn" type="text" required>
         <input autocomplete="off" id="email" name="email" placeholder="Email" type="text" required>
+        <select name="grade" id="grade" required>
+            <option value="choose" disabled selected>Vælg dit niveau</option>
+            <option value="Folkeskole">Folkeskole</option>
+            <option value="Gymnasie">Gymnasie</option>
+            <option value="Erhvervsuddannelse">Erhvervsuddannelse</option>
+            <option value="Universitet">Universitet</option>
+            <option value="Andet">Andet</option>
+        </select>
+        {% if request.args.get("error") %}
+            <p>{{ request.args.get("error") }}</p>
+        {% endif %}
         <input id="password" name="password" placeholder="Password" type="password" required>
         <input id="confirm_password" name="confirm_password" placeholder="Bekræft password" type="password" required>
         <button type="submit">Registrer</button>
@@ -99,6 +110,21 @@
             display: none;
             font-size: 0.9rem;
             margin-top: 1rem;
+        }
+
+        .content select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .content select:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
         }
 
         /* Responsive Design */

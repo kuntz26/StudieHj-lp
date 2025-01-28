@@ -55,10 +55,17 @@ def get_posts(username: str):
     conn = sqlite3.connect("database.db")
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
-    rows = cur.execute("""SELECT publicMessages.id AS id, username, header, message, category.name AS category_name, picturename, date, (SELECT COUNT(*) FROM comments WHERE messageid = publicMessages.id) AS comment_count 
-                            FROM publicMessages JOIN people ON publicMessages.senderid = people.id JOIN category ON publicMessages.categoryid = category.id 
-                            WHERE people.username = ? ORDER BY date DESC""", (username,))
-    for row in rows:
-        posts.append(dict(row))
+    if username:
+        rows = cur.execute("""SELECT publicMessages.id AS id, username, header, message, category.name AS category_name, picturename, people.grade AS grade, date, 
+                                (SELECT COUNT(*) FROM comments WHERE messageid = publicMessages.id) AS comment_count 
+                                FROM publicMessages JOIN people ON publicMessages.senderid = people.id JOIN category ON publicMessages.categoryid = category.id 
+                                WHERE people.username = ? ORDER BY date DESC""", (username,))
+        posts = [dict(row) for row in rows]
+    else:
+        rows = cur.execute("""SELECT publicMessages.id AS id, username, header, message, category.name AS category_name, picturename, people.grade AS grade, date, 
+                                (SELECT COUNT(*) FROM comments WHERE messageid = publicMessages.id) AS comment_count 
+                                FROM publicMessages JOIN people ON publicMessages.senderid = people.id  JOIN category ON publicMessages.categoryid = category.id 
+                                ORDER BY RANDOM()""")
+        posts = [dict(row) for row in rows]
     conn.close()
     return posts

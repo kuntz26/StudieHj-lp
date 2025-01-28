@@ -9,6 +9,7 @@
             <p class="message">{{ message }}</p>
         {% endif %}
         <p>Hej {{ username }}</p>
+        <p>Niveau: {{ grade }}</p>
 
         <!-- Button to open username change modal -->
         <button class="open-modal-btn" data-modal="username-change-modal">Skift brugernavn</button>
@@ -18,6 +19,9 @@
 
         <!-- Button to open account delete modal -->
         <button class="open-modal-btn" data-modal="account-delete-modal">Slet konto</button>
+
+        <!-- Button to open grade change modal -->
+        <button class="open-modal-btn" data-modal="grade-change-modal">Skift niveau</button>
 
         <!-- Link to write a post -->
         <div style="flex-grow: 1; text-align: center;">
@@ -84,6 +88,30 @@
                 <p>Bekræft dit password for at slette din konto:</p>
                 <input type="password" name="password" placeholder="Password" required>
                 <button type="submit">Slet konto</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Grade Change Modal -->
+    <div class="modal-overlay" id="grade-change-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>Skift niveau</span>
+                <button onclick="closeModal('grade-change-modal')">X</button>
+            </div>
+            <form action="/myaccount" method="post">
+                <input type="hidden" name="form_type" value="grade_change">
+                <p>Bekræft dit password for at ændre niveau:</p>
+                <input type="password" name="password" placeholder="Password" required>
+                <select name="grade" id="grade" required>
+                    <option value="choose" disabled selected>Vælg dit niveau</option>
+                    <option value="Folkeskole">Folkeskole</option>
+                    <option value="Gymnasie">Gymnasie</option>
+                    <option value="Erhvervsuddannelse">Erhvervsuddannelse</option>
+                    <option value="Universitet">Universitet</option>
+                    <option value="Andet">Andet</option>
+                </select>
+                <button type="submit">Skift niveau</button>
             </form>
         </div>
     </div>
@@ -261,6 +289,21 @@
 
         .write-post-btn:hover .plus-icon {
             color: #5c6ac4;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        select:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
         }
     </style>
 {% endblock %}
