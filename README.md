@@ -8,5 +8,4 @@ The help for homework is split in two parts. A forum where people can post a que
 
 These are the overall features of the application. There are some other small features that make the website seem more put together. 
 
-
-The flask application is in the app.py file.
+The flask application is in the app.py file. The bank_transactions.py contains code for reading a csv file, which is a feature for the budget helper. The helper.py contains extra code that is reused a few times.
