@@ -3,6 +3,7 @@ from flask import redirect, session, render_template
 from werkzeug.security import check_password_hash
 import sqlite3
 
+# Makes routes only available if the user i logged in
 def login_required(f):
     """
     Decorate routes to require login.
@@ -17,6 +18,7 @@ def login_required(f):
     return decorated_function
 
 
+# Trying to turn a str into int
 def parse_number(value):
     try:
         return int(value) if value else 0
@@ -24,6 +26,7 @@ def parse_number(value):
         return 0
 
 
+# When errors happen, this is a fun way to show the error. It is just a placeholder
 def apology(message, code=400):
     """Render message as an apology to user."""
     def escape(s):
@@ -39,6 +42,7 @@ def apology(message, code=400):
     return render_template("apology.html", top=code, bottom=escape(message)), code
 
 
+# Checks the database if the password for a specific user is correct
 def check_password(personid: int, password: str):
     conn = sqlite3.connect("database.db")
     cur = conn.cursor()
@@ -50,6 +54,7 @@ def check_password(personid: int, password: str):
     return False
 
 
+# Get all the posts from a user. Ordered by the date written
 def get_posts(username: str):
     posts = list()
     conn = sqlite3.connect("database.db")

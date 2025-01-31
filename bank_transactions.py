@@ -1,7 +1,10 @@
 import csv, os, sys, re, uuid
-# import matplotlib.pyplot as fig
 import plotly.graph_objects as go
+# import matplotlib.pyplot as fig
+# Got an error with this library
 
+
+# Testing the library
 def main():
     if len(sys.argv) != 2:
         print("Missing file")
@@ -9,6 +12,8 @@ def main():
     transactions = Transactions(sys.argv[1])
     transactions.transactions("Hovedkategori")
 
+
+# Class for calculating a budget from a .csv file
 class Transactions:
     def __init__(self, file: str):
         self.input_file = file
@@ -17,12 +22,10 @@ class Transactions:
             print("Could not open file")
             return
         
-#        self.pic_name = "Hello.html"
         self.transaction_data = dict()
-#        for group in groups:
-#            self.transactions(group)
-#            self.makePlot(self.transaction_data[group], self.pic_name)
-            
+
+
+    # Calculates the data and groups it in with the "searchword" as grouping column
     def transactions(self, searchword: str):
         self.grouped_transactions = dict()
 
@@ -55,6 +58,8 @@ class Transactions:
 
         return self.transaction_data
 
+
+    # The danish charachters are weirdly formatted
     def cleanFile(self):
         file_text = ""
         try:
@@ -70,6 +75,8 @@ class Transactions:
                 file.write(file_text)
             return True
     
+
+    # Sometimes the strings end with "... -Se medd." and this is removing it
     def cleanString(self, word: str):
         matches = re.search(r"^(.+?) *(?:-Se medd\.)*$", word, flags=re.IGNORECASE)
         return matches.group(1) if matches and matches.group(1) else word
@@ -90,6 +97,7 @@ class Transactions:
         fig.savefig(filename)
         return filename
     
+    # Makes a plot
     def makePlot(self, dictionary: dict, filename: str):
         # Prepare data for the plot
         self.plot_items = list(dictionary.keys())
