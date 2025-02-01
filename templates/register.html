@@ -6,7 +6,7 @@
 
 {% block body %}
     <h3>Lav en konto</h3><br>
-    <form action="/register" method="post" onsubmit="return validateForm()">
+    <form action="/register" method="post" onsubmit="return validateForm()" class="register">
         <input autocomplete="off" autofocus id="username" name="username" placeholder="Brugernavn" type="text" required>
         <input autocomplete="off" id="email" name="email" placeholder="Email" type="text" required>
         <select name="grade" id="grade" required>
@@ -29,23 +29,25 @@
 
     <script>
         function validateForm() {
-            let password = document.querySelector("#password");
-            let confirm_password = document.querySelector("#confirm_password")
+            let password = document.querySelector(".register #password").value;
+            let confirm_password = document.querySelector("#confirm_password").value;
             let errorMessage = document.querySelector("#error-message");
 
-            if (password.value !== confirm_password.value) {
+            if (password !== confirm_password) {
                 // Show error message
                 errorMessage.style.display = "block";
                 errorMessage.textContent = "Passwords matcher ikke!";
                 
                 // Prevent form submission
                 return false;
+            } else {
+                // Hide the error message if the file is valid
+                errorMessage.style.display = "none";
+                return true;  // Allow form submission
             }
-
-            // Hide the error message if the file is valid
-            errorMessage.style.display = "none";
-            return true;  // Allow form submission
         }
+
+        document.querySelector("form").onsubmit = validateForm;
     </script>
 
     <style>

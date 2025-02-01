@@ -32,7 +32,7 @@ def after_request(response):
 # If the user tries to access a non-existant route, they will get this 404 error
 @app.errorhandler(404)
 def notfount(e):
-    return apology("URL not found", 404)
+    return apology("Not found", 404)
 
 
 # The start / welcome page
@@ -42,7 +42,7 @@ def index():
     conn = sqlite3.connect("database.db")
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
-    rows = cur.execute("""SELECT people.username AS username, publicMessages.header AS header, publicMessages.message AS message, category.name AS category_name, people.grade AS grade,
+    rows = cur.execute("""SELECT publicMessages.id AS id, people.username AS username, publicMessages.header AS header, publicMessages.message AS message, category.name AS category_name, people.grade AS grade,
                             publicMessages.date AS date, publicMessages.picturename AS picturename, (SELECT COUNT(id) FROM comments WHERE messageid = publicMessages.id) AS comment_count
                             FROM publicMessages JOIN people ON publicMessages.senderid = people.id JOIN category ON category.id = publicMessages.categoryid
                             ORDER BY RANDOM() LIMIT 20""")
@@ -140,13 +140,12 @@ def budget():
 def upload_file():
     # Error if the user assesses this route via the URL
     if request.method == "GET":
-        return apology("404 Not Found", 404)
+        return apology("Not Found", 404)
     
     # Checks if the file given is correct and saves it on the disk
     file = request.files.get("file")
     if not file:
-        print("Not working")
-        return apology("Internal error", code=500)
+        return apology("Internal server error", 500)
     if file is None or file.filename == "":
         return redirect("/budget?error=Ingen fil uploaded")
     if not file.filename.endswith(".csv"): # Can use regex: re.search(r"^.+\.csv$", file.filename)
@@ -276,7 +275,7 @@ def register():
         if username is None or email is None or password is None or grade is None:
             return apology("Brugernavn, Niveau, email og/eller password mangler")
         if username == "Slettet":
-            return apology("Username not possible", 500)
+            return apology("Brugernavn ikke mulig", 500)
         # Checks if the grade chosen is one of the possible ones
         if grade not in grades:
             return apology("Internal server error", 500)
@@ -326,8 +325,10 @@ def myaccount():
             case "username_change":
                 if not check_password(session["user_id"], request.form.get("password")):
                     conn.close()
-                    return apology("Wrong password")
+                    return apology("Forkert password")
                 if new_username := request.form.get("newusername"):
+                    if new_username == "Slettet":
+                        return apology("Brugernavn ikke mulig")
                     cur.execute("UPDATE people SET username = ? WHERE id = ?", (new_username, session["user_id"]))
                     conn.commit()
                     conn.close()
@@ -338,20 +339,19 @@ def myaccount():
                 new_password = request.form.get("newpassword")
                 if new_password == request.form.get("confirmpassword"):
                     if check_password(session["user_id"], request.form.get("oldpassword")):
-                        print(new_password)
                         cur.execute("UPDATE login SET password = ? WHERE personid = ?", (generate_password_hash(new_password), session["user_id"]))
                         conn.commit()
                         conn.close()
                         return render_success
                     conn.close()
-                    return apology("Wrong password")
+                    return apology("Forkert password")
                 conn.close()
                 return apology("Passwords not matching")
 
             case "account_delete":
                 if not check_password(session["user_id"], request.form.get("password")):
                     conn.close()
-                    return apology("Wrong password")
+                    return apology("Forkert password")
                 # Delete files in people.filename and
                 if session.get("picture_path"):
                     try:
@@ -375,7 +375,7 @@ def myaccount():
                 grades = ["Folkeskole", "Gymnasie", "Universitet", "Erhvervsuddannelse", "Andet"]
                 if not check_password(session["user_id"], request.form.get("password")):
                     conn.close()
-                    return apology("Wrong password")
+                    return apology("Forkert password")
                 if new_grade := request.form.get("grade"):
                     if not new_grade in grades:
                         return apology("Internal server error", 500)
@@ -577,7 +577,7 @@ def private_messages():
                 FROM privateMessages
                 INNER JOIN people ON people.id = privateMessages.senderid
                 WHERE privateMessages.senderid = ? OR privateMessages.recipientid = ?
-                GROUP BY other_username ORDER BY privateMessages.date ASC"""
+                GROUP BY other_username ORDER BY latest_date DESC"""
     rows = cur.execute(query, (session["user_id"],)*4)
     for row in rows:
         messages.append(dict(row))
@@ -588,7 +588,6 @@ def private_messages():
     else:
         messages = None
 
-    print(messages)
     return render_template("privatemessages.html", messages=messages)
 
 
@@ -604,7 +603,7 @@ def writemessage():
     if not (username and message):
         return apology("Internal server error", 500)
     if username == "Slettet":
-        return apology("Can't write to a deleted account")
+        return apology("Kan ikke skrive til en slettet konto")
 
     conn = sqlite3.connect("database.db")
     cur = conn.cursor()
@@ -624,8 +623,8 @@ def writemessage():
 @app.route("/privatemessages/<username>")
 @login_required
 def private_messages_user(username: str):
-    if username == session["username"]:
-        return apology("Internal server error", 500)
+    if username == session["username"] or username == "Slettet":
+        return redirect("/privatemessages")
     conn = sqlite3.connect("database.db")
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()

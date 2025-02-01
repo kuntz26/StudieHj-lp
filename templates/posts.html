@@ -7,7 +7,7 @@
                 <p class="category">Kategori: {{ post.category_name }}</p>
             </div>
             <div class="post-meta">
-                <span class="username">Af: <a href="{% if post.username != 'Slettet' %}/accounts/{{ post.username }} {% else %}#{% endif %}">{{ post.username }}</a></span>
+                <span class="username">Af: <a href="{% if post.username != 'Slettet' %} /accounts/{{ post.username }} {% else %}#{% endif %}">{{ post.username }}</a></span>
                 <span class="date">Skrevet d. {{ post.date }}</span>
                 <span class="grade">Niveau: {{ post.grade }}</span>
             </div>

@@ -16,16 +16,17 @@
             <a href="/budgethjælp">Hvordan får man et sundt budget?</a>
             <a href="/suhjælp">Hvordan fungerer SU og hvordan er satserne?</a>
         </div><br><br>
-        <h5>Upload en .csv fil downloaded fra din bank</h5>
+        <h5>Upload en .csv fil downloaded fra din bank, eller gå ned for at udfylde manuelt</h5>
         <form action="/uploadfile" method="post" id="file" enctype="multipart/form-data" onsubmit="return validateForm()">
             <h6>Vær opmærksom på at kolonnerne skal være separeret med semikolon (";") og ikke komma (",").</h6>
             <input type="file" name="file" id="transactions" accept=".csv" required>
             <input type="submit">
             <p id="error-message" style="color: red; display: none;">Vælg en .csv fil før du sender.</p>
         </form>
-
-        <h5>Indtast manuelt. Vælg en periode, og tæl sammen for alle kategorier. Du kan kun indsætte hele tal. <br><u>Husk at skrive det som negativ værdi, hvis det er en udgift!</u></h5>
+        <h3>Indtast manuelt</h3>
+        <h5>Vælg en periode, og tæl sammen for alle kategorier. Du kan kun indsætte hele tal. <br><u>Husk at skrive det som negativ værdi, hvis det er en udgift!</u></h5>
         <form id="choice">
+            <p>Vælg enten simpel eller advanceret input:</p>
             <input type="radio" name="choice" value="simple">Simpelt
             <input type="radio" name="choice" value="advanced">Advanceret
         </form>

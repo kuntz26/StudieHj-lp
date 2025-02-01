@@ -4,32 +4,30 @@
 
 {% block body %}
     <h3>Skriver til: <a href="/accounts/{{ other_username }}"></a>{{ other_username }}</h3>
-    {% if messages %}
         <section class="msger">
-            <main class="msger-chat">
-                {% for message in messages %}
-                    <div class="msg {% if message.senderid == session['user_id'] %}right-msg{% else %}left-msg{% endif %}">
-                        <div class="msg-bubble">
-                            <div class="msg-info">
-                                <div class="msg-info-name">{{ message.username }}</div>
-                                <div class="msg-info-time">{{ message.date }}</div>
-                            </div>
-                            <div class="msg-text">
-                                {{ message.message }}
-                            </div>
+        <main class="msger-chat">
+            {% for message in messages %}
+                <div class="msg {% if message.senderid == session['user_id'] %}right-msg{% else %}left-msg{% endif %}">
+                    <div class="msg-bubble">
+                        <div class="msg-info">
+                            <div class="msg-info-name">{{ message.username }}</div>
+                            <div class="msg-info-time">{{ message.date }}</div>
+                        </div>
+                        <div class="msg-text">
+                            {{ message.message }}
                         </div>
                     </div>
-                {% endfor %}
-            </main>
-            {% if other_username != "Slettet" %}
-                <form class="msger-inputarea" action="/privatemessages/write" method="post">
-                    <input type="hidden" name="username" value="{{ other_username }}">
-                    <input autocomplete="off" type="text" class="msger-input" placeholder="Enter your message..." name="message">
-                    <button type="submit" class="msger-send-btn">Send</button>
-                </form>
-            {% endif %}
-        </section>
-    {% endif %}
+                </div>
+            {% endfor %}
+        </main>
+        {% if other_username != "Slettet" %}
+            <form class="msger-inputarea" action="/privatemessages/write" method="post">
+                <input type="hidden" name="username" value="{{ other_username }}">
+                <input autocomplete="off" type="text" class="msger-input" placeholder="Enter your message..." name="message">
+                <button type="submit" class="msger-send-btn">Send</button>
+            </form>
+        {% endif %}
+    </section>
     <script>
         window.onload = function() {
             const chatContainer = document.querySelector('.msger-chat');
@@ -67,7 +65,7 @@
             width: 100%;
             max-width: 867px;
             margin: 50px auto;  /* Ensure margin top to avoid overlap with navbar */
-            height: 100vh; /* Full height of the page */
+            height: 60vh; /* Full height of the page */
             border: var(--border);
             border-radius: 5px;
             background: var(--msger-bg);
