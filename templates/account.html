@@ -6,9 +6,11 @@
     <div class="profile-container">
         <h1 class="profile-username">{{ username }}</h1>
         
-        <a href="/privatemessages/{{username}}" class="message-btn">
-            Skriv direkte til denne person
-        </a>
+        {% if session["user_id"] %}
+            <a href="/privatemessages/{{username}}" class="message-btn">
+                Skriv direkte til denne person
+            </a>
+        {% endif %}
 
         {% if posts %}
             <div class="posts-section">

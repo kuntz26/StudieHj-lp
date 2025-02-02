@@ -393,6 +393,8 @@ def myaccount():
 # View posts from a specific user
 @app.route("/accounts/<username>")
 def account(username: str):
+    if username == session["username"]:
+        redirect("/myaccount")
     return render_template("account.html", posts=get_posts(username), username=username)
 
 
