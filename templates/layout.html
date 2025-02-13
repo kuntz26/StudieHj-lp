@@ -39,6 +39,7 @@
                         </div>
                     </div>
                     <a href="/lektiehjælp" class="nav-item nav-link">Lektieforum</a>
+                    <!-- Checks if the user is logged in -->
                     {% if session["user_id"] %}
                         <a href="/privatemessages" class="nav-item nav-link">Private beskeder</a>
                     {% endif %}
@@ -53,6 +54,7 @@
                     </div>
                 </form>
                 <div class="navbar-nav action-buttons ml-auto">
+                    <!-- Checks if the user is logged in -->
                     {% if session["user_id"] %}
                         <a href="/logout" class="btn">Log ud</a>
                         <a href="/myaccount" class="btn btn-primary">Min konto</a>
@@ -78,6 +80,7 @@
         </nav>
 
         <div class="content">
+            <!-- The place where code is inserted from other files using "extends" keyword -->
             {% block body %}{% endblock %}
         </div>
     </body>

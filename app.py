@@ -10,9 +10,10 @@ from werkzeug.security import generate_password_hash
 # Flask configuration
 app = Flask(__name__)
 
+# Logs a user out after 24 hours
 app.config["SESSION_PERMANENT"] = True
 app.config["SESSION_TYPE"] = "filesystem"
-app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=7)
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=24)
 app.secret_key = os.environ.get("SECRET_KEY", secrets.token_hex(32))
 Session(app)
 
@@ -365,7 +366,7 @@ def myaccount():
                         pass
                 
                 cur.execute("DELETE FROM login WHERE personid = ?", (session["user_id"],))
-                cur.execute("UPDATE people SET username = 'Slettet' WHERE id = ?", (session["user_id"],))
+                cur.execute(f"UPDATE people SET username = '{session["username"]} (slettet)' WHERE id = ?", (session["user_id"],))
                 conn.commit()
                 session.clear()
                 conn.close()

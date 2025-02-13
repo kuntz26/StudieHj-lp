@@ -16,12 +16,16 @@ def main():
 # Class for calculating a budget from a .csv file
 class Transactions:
     def __init__(self, file: str):
+        # Name of the given file
         self.input_file = file
-        self.new_file = uuid.uuid4().hex + ".csv"
+        #
+        self.temporary_file = uuid.uuid4().hex + ".csv"
+        # Cleans the data from the given file to show correct danish charachters
         if not self.cleanFile():
             print("Could not open file")
             return
         
+        # Makes a dict for future use
         self.transaction_data = dict()
 
 
@@ -29,21 +33,27 @@ class Transactions:
     def transactions(self, searchword: str):
         self.grouped_transactions = dict()
 
-        with open(self.new_file, "r") as file:
+        # Opens the clean file
+        with open(self.temporary_file, "r") as file:
             reader = csv.DictReader(file, delimiter=";")
             for row in reader:
+                # Cleans the searchword for unneccessary long name (Not needed)
                 clean_searchword = self.cleanString(row[searchword])
+                # Checks if the category exists in the dict and adds the sum to the dict (Rounds the float to two decimals)
                 if not clean_searchword in self.grouped_transactions:
                     self.grouped_transactions[clean_searchword] = round(float(''.join(row["Beløb"].split(".")).replace(",", ".")), 2)
                 else:
                     self.grouped_transactions[clean_searchword] = round(self.grouped_transactions[clean_searchword] + round(float(''.join(row["Beløb"].split(".")).replace(",", ".")), 2), 2)
         
+        # This new variable is only needed if possible to categorize by many different columns
         self.transaction_data[searchword] = self.grouped_transactions
+        # Deletes the temporary file
         try:
-            os.remove(self.new_file)
+            os.remove(self.temporary_file)
         except Exception as e:
             print(f"An error occured {e}")
         
+        # Rearranging to put "Indtægter" first and "Andet" last
         try:
             indtægt = self.transaction_data["Hovedkategori"].pop("Indtægter")
             self.transaction_data["Hovedkategori"] = {"Indtægter": indtægt, **self.transaction_data["Hovedkategori"]}
@@ -70,8 +80,9 @@ class Transactions:
             print("File not found")
             return False
         else:
+            # Æ, ø, å
             file_text = file_text.replace("Ã¦", "æ").replace("Ã¸", "ø").replace("Ã¥", "å").replace("Ã©", "é")
-            with open(self.new_file, "w") as file:
+            with open(self.temporary_file, "w") as file:
                 file.write(file_text)
             return True
     
@@ -80,22 +91,6 @@ class Transactions:
     def cleanString(self, word: str):
         matches = re.search(r"^(.+?) *(?:-Se medd\.)*$", word, flags=re.IGNORECASE)
         return matches.group(1) if matches and matches.group(1) else word
-    
-#    def makePlot(self, dictionary: dict, filename: str):
-        self.plot_items = list()
-        self.plot_values = list()
-        for kwarg in dictionary:
-            self.plot_items.append(kwarg)
-            self.plot_values.append(dictionary[kwarg])
-        fig.bar(self.plot_items, self.plot_values, color="g", width=0.72, label="Forbrug")
-        fig.xticks(rotation = 90)
-        fig.xlabel("Kategorier")
-        fig.ylabel("dkk")
-        fig.title(f"Forbrug fordelt på kategorier", fontsize = 15)
-        fig.tight_layout()
-        fig.legend()
-        fig.savefig(filename)
-        return filename
     
     # Makes a plot
     def makePlot(self, dictionary: dict, filename: str):

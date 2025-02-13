@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS people (
     id              INTEGER NOT NULL,
-    username        TEXT NOT NULL,
+    username        TEXT NOT NULL UNIQUE,
     grade           TEXT NOT NULL,
     filename        TEXT,
     PRIMARY KEY(id AUTOINCREMENT)
